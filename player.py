@@ -6,6 +6,7 @@ class PlayerController:
         self.level = level
 
         self.cave = level.choose_empty_cave()
+        self.initial_cave = self.cave
         self.alive = True
         self.win = False
 
@@ -54,6 +55,11 @@ class PlayerController:
             self.get_action()
 
         return self.win
+
+    def respawn(self):
+        self.cave = self.initial_cave
+        self.alive = True
+        self.win = False
 
 
 def input_location(msg: str, level: dict[int, Cave]):

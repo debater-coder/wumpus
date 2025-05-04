@@ -17,12 +17,12 @@ if __name__ == "__main__":
         level_map = fp.read()
 
     level = Level(level_map)
+    player = TextPlayerController(level)
 
     while True:
         if DEBUG:
             print("Level:", level)
 
-        player = TextPlayerController(level)
 
         win = player.play()
 
@@ -37,3 +37,6 @@ if __name__ == "__main__":
 
         if input("Same setup (Y-N)? ")[0].lower() == "n":
             level = Level(level_map)
+            player = TextPlayerController(level)
+        else:
+            player.respawn()
