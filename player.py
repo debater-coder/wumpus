@@ -27,7 +27,7 @@ class PlayerController:
 
         hit = hazard.on_arrow_enter(self) if hazard else False
 
-        if hit:
+        if not hit:
             # wake up any hazards that respond to arrow misses
             for hazard in self.level.hazards.values():
                 hazard.on_arrow_miss(self)
