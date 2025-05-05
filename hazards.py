@@ -54,6 +54,7 @@ class Wumpus(Hazard):
         if self.location == player.cave.location:
             player.alive = False
             player.win = False
+            print("Wumpus EATS YOU UP!")
 
 
 
