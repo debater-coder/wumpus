@@ -8,7 +8,10 @@ if TYPE_CHECKING:
 
 
 class Hazard:
-    """Hazards are located in a cave, they can affect the player's location or cause the player to lose"""
+    """
+    Hazards are located in a cave, they can affect the player's location or
+    cause the player to lose.
+    """
     def __init__(self, level: Level):
         self.location: int | None = None
         self.level = level
@@ -36,6 +39,12 @@ class Hazard:
 
 
 class Wumpus(Hazard):
+    """
+    The Wumpus dies when it is hit by an arrow, and is startled by arrows
+    missing its cave or the player entering the cave. When it is startled,
+    there is a 75% chance of it moving to another cave and a 25% chance of
+    eating the player.
+    """
     def nearby_msg(self):
         return "I smell a Wumpus."
 
@@ -65,6 +74,7 @@ class Wumpus(Hazard):
 
 
 class BottomlessPit(Hazard):
+    """Kills the player when it enters the cave."""
     def nearby_msg(self):
         return "I feel a draft."
 
@@ -75,6 +85,10 @@ class BottomlessPit(Hazard):
 
 
 class Superbats(Hazard):
+    """
+    Picks up the player and drops them in a random cave, potentially one
+    with hazards.
+    """
     def nearby_msg(self):
         return "Bats nearby."
 
