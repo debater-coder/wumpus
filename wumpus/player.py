@@ -1,4 +1,4 @@
-from level import Cave, Level
+from wumpus.level import Cave, Level
 from random import choice
 
 class PlayerController:

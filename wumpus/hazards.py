@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 from random import choice
 
 if TYPE_CHECKING:
-    from level import Level
-    from player import PlayerController
+    from wumpus.level import Level
+    from wumpus.player import PlayerController
 
 
 class Hazard:

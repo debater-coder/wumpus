@@ -3,8 +3,8 @@
 An implementation of the text adventure game "Hunt the Wumpus".
 """
 import argparse
-from level import Level
-from player import TextPlayerController
+from wumpus.level import Level
+from wumpus.player import TextPlayerController
 
 
 parser = argparse.ArgumentParser(prog='Wumpus OOP')
@@ -13,7 +13,7 @@ DEBUG = parser.parse_args().debug
 
 
 if __name__ == "__main__":
-    with open("../level.json") as fp:
+    with open("level.json") as fp:
         level_map = fp.read()
 
     level = Level(level_map)
