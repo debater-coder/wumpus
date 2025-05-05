@@ -1,17 +1,23 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from random import choice
+
+if TYPE_CHECKING:
+    from level import Level
+    from player import PlayerController
 
 
 class Hazard:
     """Hazards are located in a cave, they can affect the player's location or cause the player to lose"""
-    def __init__(self, level: "Level"):
+    def __init__(self, level: Level):
         self.location: int | None = None
         self.level = level
 
-    def on_arrow_miss(self, player: "PlayerController"):
+    def on_arrow_miss(self, player: PlayerController):
         """Called when an arrow does not hit any hazards that are not immune."""
         pass
 
-    def on_arrow_enter(self, player: "PlayerController") -> bool:
+    def on_arrow_enter(self, player: PlayerController) -> bool:
         """
         Called when an arrow hits the cave this hazard is in.
 
@@ -20,7 +26,7 @@ class Hazard:
         """
         return False
 
-    def on_player_enter(self, player: "PlayerController"):
+    def on_player_enter(self, player: PlayerController):
         """Called when the player enters the cave this hazard is in."""
         pass
 
@@ -33,17 +39,17 @@ class Wumpus(Hazard):
     def nearby_msg(self):
         return "I smell a Wumpus."
 
-    def on_player_enter(self, player: "PlayerController"):
+    def on_player_enter(self, player: PlayerController):
         self.startle(player)
 
-    def on_arrow_enter(self, player: "PlayerController") -> bool:
+    def on_arrow_enter(self, player: PlayerController) -> bool:
         player.win = True
         return True
 
-    def on_arrow_miss(self, player: "PlayerController"):
+    def on_arrow_miss(self, player: PlayerController):
         self.startle(player)
 
-    def startle(self, player: "PlayerController"):
+    def startle(self, player: PlayerController):
         if not self.location: raise ValueError
 
         move = choice([*self.level.get_cave(self.location).tunnels, None])
@@ -62,7 +68,7 @@ class BottomlessPit(Hazard):
     def nearby_msg(self):
         return "I feel a draft."
 
-    def on_player_enter(self, player: "PlayerController"):
+    def on_player_enter(self, player: PlayerController):
         player.alive = False
         print("YIIIEEEE... fell in pit!")
 
@@ -72,6 +78,6 @@ class Superbats(Hazard):
     def nearby_msg(self):
         return "Bats nearby."
 
-    def on_player_enter(self, player: "PlayerController"):
+    def on_player_enter(self, player: PlayerController):
         print("ZAP -- Super bat snatch! Elsewhereville for you!")
         player.move(choice(list(self.level.level.values())).location)
