@@ -13,7 +13,7 @@ DEBUG = parser.parse_args().debug
 
 
 if __name__ == "__main__":
-    with open("level.json") as fp:
+    with open("../level.json") as fp:
         level_map = fp.read()
 
     level = Level(level_map)

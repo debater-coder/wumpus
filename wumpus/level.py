@@ -1,5 +1,5 @@
 import json
-from hazards import Hazard, BottomlessPit, Wumpus, Superbats
+from wumpus.hazards import Hazard, BottomlessPit, Wumpus, Superbats
 from random import choice
 
 
