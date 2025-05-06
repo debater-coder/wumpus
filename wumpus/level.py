@@ -1,19 +1,13 @@
+from dataclasses import dataclass
 import json
 from wumpus.hazards import Hazard, BottomlessPit, Wumpus, Superbats
 from random import choice
 
 
+@dataclass
 class Cave:
-    """
-    Caves contain tunnels to other caves.
-
-    Arguments:
-    location -- The cave number
-    tunnels -- List of cave locations that this cave connects to.
-    """
-    def __init__(self, location: int, tunnels: list[int]):
-        self.location = location
-        self.tunnels = tunnels
+    location: int
+    tunnels: list[int]
 
 
 

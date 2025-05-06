@@ -49,6 +49,9 @@ class Wumpus(Hazard):
         return "I smell a Wumpus."
 
     def on_player_enter(self, player: PlayerController):
+        player.alive = False
+        player.win = False
+        print("Wumpus EATS YOU UP!")
         self.startle(player)
 
     def on_arrow_enter(self, player: PlayerController) -> bool:
