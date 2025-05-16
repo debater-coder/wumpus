@@ -2,13 +2,14 @@
 11 Software Engineering 2025 Project
 An implementation of the text adventure game "Hunt the Wumpus".
 """
+
 import argparse
-from wumpus.level import Level
-from wumpus.player import TextPlayerController
+from .level import Level
+from .player import TextPlayerController
 
 
-parser = argparse.ArgumentParser(prog='Wumpus OOP')
-parser.add_argument('-d', '--debug', action='store_true')
+parser = argparse.ArgumentParser(prog="Wumpus OOP")
+parser.add_argument("-d", "--debug", action="store_true")
 DEBUG = parser.parse_args().debug
 
 
@@ -23,11 +24,12 @@ if __name__ == "__main__":
         if DEBUG:
             print("Level:", level)
 
-
         win = player.play()
 
         if win:
-            print(f"AHA! You got the Wumpus. He was in room {level.get_wumpus_location()}")
+            print(
+                f"AHA! You got the Wumpus. He was in room {level.get_wumpus_location()}"
+            )
             print("Wumpus will get you next time!")
         else:
             print("You lost!")
