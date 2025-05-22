@@ -56,6 +56,8 @@ class Level:
             case PlayerKilled() | PlayerWon():
                 yield event  # these events are passed to the PlayerController
             case PlayerMoved(location):
+                yield event
+
                 self.player = location
 
                 cave = self.get_cave(location)
@@ -70,7 +72,6 @@ class Level:
                         )
                     )
 
-                yield event
             case WumpusMoved(location):
                 wumpus = self.get_hazard_in_cave(
                     self.get_cave(self.get_wumpus_location())

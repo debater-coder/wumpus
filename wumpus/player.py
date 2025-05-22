@@ -31,7 +31,8 @@ class PlayerController:
 
     def emit_to_level(self, event: Event):
         for player_event in self.level.handle_event(event):
-            print("player handling event:", player_event)
+            if self.level.debug:
+                print("player handling event:", player_event)
             match player_event:
                 case PlayerKilled():
                     self.alive = False
