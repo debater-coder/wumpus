@@ -41,16 +41,15 @@ class Level:
             self.hazards[location] = hazard
             hazard.location = location
 
-    """
-    Handles an event triggered by an object in the game.
-
-    Yields:
-        - Events to be handled by the PlayerController
-    """
-
     def handle_event(
         self, event: Event
     ) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved]:
+        """
+        Handles an event triggered by an object in the game.
+
+        Yields:
+            - Events to be handled by the PlayerController
+        """
         if self.debug:
             print(event)
         match event:
@@ -64,7 +63,12 @@ class Level:
                 if self.debug:
                     print(f"handling player moved, hazard: {hazard}, cave: {cave}")
                 if hazard:
-                    list(map(self.handle_event, hazard.on_player_enter()))
+                    yield from chain(
+                        *(
+                            self.handle_event(event)
+                            for event in hazard.on_player_enter()
+                        )
+                    )
 
                 yield event
             case WumpusMoved(location):
@@ -81,7 +85,7 @@ class Level:
 
                 # if we enter the room the player is in
                 if wumpus.location == self.player:
-                    list(map(self.handle_event, wumpus.on_player_enter()))
+                    yield from chain(*(self.handle_event(event) for event in wumpus.on_player_enter()))
             case ArrowShot(location):
                 hazard = self.get_hazard_in_cave(self.get_cave(location))
 
@@ -96,15 +100,17 @@ class Level:
                     events += list(hazard.on_arrow_enter())
 
                 if not any([isinstance(event, ArrowHit) for event in events]):
-                    list(map(
-                        self.handle_event,
-                        chain(
-                            *(
-                                hazard.on_arrow_miss()
-                                for hazard in self.hazards.values()
+                    yield from chain(
+                        *(
+                            self.handle_event(event)
+                            for event in chain(
+                                *(
+                                    hazard.on_arrow_miss()
+                                    for hazard in self.hazards.values()
+                                )
                             )
-                        ),
-                    ))
+                        )
+                    )
 
             case ArrowHit():
                 pass

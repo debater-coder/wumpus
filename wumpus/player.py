@@ -30,8 +30,9 @@ class PlayerController:
         self.emit_to_level(ArrowShot(location))
 
     def emit_to_level(self, event: Event):
-        for player_events in self.level.handle_event(event):
-            match player_events:
+        for player_event in self.level.handle_event(event):
+            print("player handling event:", player_event)
+            match player_event:
                 case PlayerKilled():
                     self.alive = False
                 case PlayerWon():
@@ -39,7 +40,7 @@ class PlayerController:
                 case PlayerMoved(location):
                     self.cave = self.level.get_cave(location)
                 case _:
-                    assert_never(player_events)
+                    assert_never(player_event)
 
     def get_nearby_msgs(self):
         messages: list[str] = []

@@ -10,9 +10,7 @@ class TestWumpus(unittest.TestCase):
         iterations = 1000
 
         for _ in range(iterations):
-            wumpus = hazards.Wumpus({
-                0: cave.Cave(0, [1, 2, 3])
-            })
+            wumpus = hazards.Wumpus({0: cave.Cave(0, [1, 2, 3])})
             wumpus.location = 0
             print(wumpus.location)
 
@@ -37,6 +35,5 @@ class TestWumpus(unittest.TestCase):
         self.assertAlmostEqual(final_locations[3] / iterations, 0.25, places=1)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
