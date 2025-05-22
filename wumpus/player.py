@@ -1,7 +1,18 @@
-from wumpus.level import Cave, Level
+from .events import ArrowShot, PlayerKilled, PlayerMoved, PlayerWon, Event
+from .level import Level
+from .cave import Cave
+
 from random import choice
+from typing import assert_never
+
 
 class PlayerController:
+    """
+    Responsibility:
+        - Emit events to level like PlayerMoved
+        - Handle events such as PlayerKilled
+    """
+
     def __init__(self, level: Level):
         self.level = level
 
@@ -10,31 +21,25 @@ class PlayerController:
         self.alive = True
         self.win = False
 
+        self.emit_to_level(PlayerMoved(self.cave.location))
+
     def move(self, location: int):
-        """Moves the player to the cave specified."""
-        self.cave = self.level.get_cave(location)
-
-        hazard = self.level.get_hazard_in_cave(self.cave)
-
-        if hazard:
-            hazard.on_player_enter(self)
+        self.emit_to_level(PlayerMoved(location))
 
     def shoot(self, location: int):
-        """Shoots an arrow through the cave specified."""
-        cave = self.level.get_cave(location)
+        self.emit_to_level(ArrowShot(location))
 
-        hazard = self.level.get_hazard_in_cave(cave)
-
-        hit = hazard.on_arrow_enter(self) if hazard else False
-
-        if not hit:
-            # wake up any hazards that respond to arrow misses
-            for hazard in self.level.hazards.values():
-                hazard.on_arrow_miss(self)
-
-        if location == self.cave.location:
-            self.alive = False
-            print("oops... you shot yourself!")
+    def emit_to_level(self, event: Event):
+        for player_events in self.level.handle_event(event):
+            match player_events:
+                case PlayerKilled():
+                    self.alive = False
+                case PlayerWon():
+                    self.win = True
+                case PlayerMoved(location):
+                    self.cave = self.level.get_cave(location)
+                case _:
+                    assert_never(player_events)
 
     def get_nearby_msgs(self):
         messages: list[str] = []
@@ -68,7 +73,7 @@ def input_location(msg: str, level: dict[int, Cave]):
             location = int(input(msg))
             if location in level:
                 return location
-        except:
+        except ValueError:
             pass
         print("Can't go there!")
 
@@ -79,7 +84,9 @@ class TextPlayerController(PlayerController):
             print(f"You are in room {self.cave.location}.")
             for msg in self.get_nearby_msgs():
                 print(f"    {msg}")
-            print(f"Tunnels lead to {', '.join([str(tunnel) for tunnel in self.cave.tunnels])}.")
+            print(
+                f"Tunnels lead to {', '.join([str(tunnel) for tunnel in self.cave.tunnels])}."
+            )
 
             action = input("Shoot or move (S-M)? ")
             try:
@@ -89,7 +96,10 @@ class TextPlayerController(PlayerController):
                         print("Crooked arrows aren't that crooked!")
                         continue
 
-                    locations = [input_location("Room #? ", self.level.level) for _ in range(rooms)]
+                    locations = [
+                        input_location("Room #? ", self.level.level)
+                        for _ in range(rooms)
+                    ]
 
                     current_cave = self.cave
 
@@ -107,7 +117,7 @@ class TextPlayerController(PlayerController):
                     location = input_location("Move to? ", self.level.level)
                     self.move(location)
                     break
-            except:
+            except ValueError:
                 print("Can't do that!")
             else:
                 print("Can't do that!")
