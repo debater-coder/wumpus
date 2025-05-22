@@ -9,3 +9,9 @@
 #### Future improvements
 - Add unit tests and documentation
 - Change `Level` to an event-based system, where entities yield or return events that control the level, rather than having a tight coupling to the `Level` and `PlayerController`
+
+## 22/05/2025 git commit hash `854cebf7a5eb777694642c36225013d7ddd866ef`
+### Tasks completed
+- Added event based architecture
+- This helped to decouple the Hazards from the Level
+- Handling of player interaction with Hazards was also moved to Level.
