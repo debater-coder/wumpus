@@ -1,7 +1,16 @@
-from .events import ArrowShot, PlayerKilled, PlayerMoved, PlayerWon, Event
+from .events import (
+    ArrowMissed,
+    ArrowShot,
+    PlayerKilled,
+    PlayerMoved,
+    PlayerWon,
+    Event,
+    ArrowHit,
+)
 from .level import Level
 from .cave import Cave
 
+from collections.abc import Iterator
 from random import choice
 from typing import assert_never
 
@@ -26,10 +35,14 @@ class PlayerController:
     def move(self, location: int):
         self.emit_to_level(PlayerMoved(location))
 
-    def shoot(self, location: int):
-        self.emit_to_level(ArrowShot(location))
+    def shoot(self, locations: list[int]):
+        for location in locations:
+            if any([isinstance(event, ArrowHit) for event in self.emit_to_level(ArrowShot(location))]):
+                return
 
-    def emit_to_level(self, event: Event):
+        self.emit_to_level(ArrowMissed())
+
+    def emit_to_level(self, event: Event) -> Iterator[ArrowHit]:
         for player_event in self.level.handle_event(event):
             if self.level.debug:
                 print("player handling event:", player_event)
@@ -40,6 +53,8 @@ class PlayerController:
                     self.win = True
                 case PlayerMoved(location):
                     self.cave = self.level.get_cave(location)
+                case ArrowHit():
+                    yield player_event
                 case _:
                     assert_never(player_event)
 
@@ -103,17 +118,14 @@ class TextPlayerController(PlayerController):
                         for _ in range(rooms)
                     ]
 
-                    current_cave = self.cave
+                    locations = [locations[0]] + [
+                        next_loc
+                        if next_loc in (cave := self.level.get_cave(prev_loc)).tunnels
+                        else choice(cave.tunnels)
+                        for prev_loc, next_loc in zip(locations, locations[1:])
+                    ]
 
-                    for location in locations:
-                        if location not in current_cave.tunnels:
-                            location = choice(current_cave.tunnels)
-                            print("Lost control of arrow!")
-
-                        self.shoot(location)
-
-                        current_cave = self.level.get_cave(location)
-
+                    self.shoot(locations)
                     break
                 elif action.lower()[0] == "m":
                     location = input_location("Move to? ", self.level.level)

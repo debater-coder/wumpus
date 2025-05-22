@@ -8,7 +8,15 @@ and Hazards.
 from dataclasses import dataclass
 
 
-type Event = PlayerKilled | PlayerWon | PlayerMoved | WumpusMoved | ArrowShot | ArrowHit
+type Event = (
+    PlayerKilled
+    | PlayerWon
+    | PlayerMoved
+    | WumpusMoved
+    | ArrowShot
+    | ArrowHit
+    | ArrowMissed
+)
 
 
 @dataclass
@@ -37,4 +45,8 @@ class ArrowShot(EntityMoved):
 
 
 class ArrowHit:
+    pass
+
+
+class ArrowMissed:
     pass

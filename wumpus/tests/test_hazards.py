@@ -33,7 +33,3 @@ class TestWumpus(unittest.TestCase):
         self.assertAlmostEqual(final_locations[1] / iterations, 0.25, places=1)
         self.assertAlmostEqual(final_locations[2] / iterations, 0.25, places=1)
         self.assertAlmostEqual(final_locations[3] / iterations, 0.25, places=1)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -5,6 +5,7 @@ from typing import assert_never
 from itertools import chain
 
 from .events import (
+    ArrowMissed,
     Event,
     PlayerKilled,
     PlayerWon,
@@ -43,7 +44,7 @@ class Level:
 
     def handle_event(
         self, event: Event
-    ) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved]:
+    ) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved | ArrowHit]:
         """
         Handles an event triggered by an object in the game.
 
@@ -53,7 +54,7 @@ class Level:
         if self.debug:
             print(event)
         match event:
-            case PlayerKilled() | PlayerWon():
+            case PlayerKilled() | PlayerWon() | ArrowHit():
                 yield event  # these events are passed to the PlayerController
             case PlayerMoved(location):
                 yield event
@@ -86,7 +87,12 @@ class Level:
 
                 # if we enter the room the player is in
                 if wumpus.location == self.player:
-                    yield from chain(*(self.handle_event(event) for event in wumpus.on_player_enter()))
+                    yield from chain(
+                        *(
+                            self.handle_event(event)
+                            for event in wumpus.on_player_enter()
+                        )
+                    )
             case ArrowShot(location):
                 hazard = self.get_hazard_in_cave(self.get_cave(location))
 
@@ -95,26 +101,30 @@ class Level:
                     yield PlayerKilled()
                     return
 
-                events = []
-
                 if hazard:
-                    events += list(hazard.on_arrow_enter())
-
-                if not any([isinstance(event, ArrowHit) for event in events]):
                     yield from chain(
                         *(
                             self.handle_event(event)
                             for event in chain(
                                 *(
-                                    hazard.on_arrow_miss()
+                                    hazard.on_arrow_enter()
                                     for hazard in self.hazards.values()
                                 )
                             )
                         )
                     )
-
-            case ArrowHit():
-                pass
+            case ArrowMissed():
+                yield from chain(
+                    *(
+                        self.handle_event(event)
+                        for event in chain(
+                            *(
+                                hazard.on_arrow_miss()
+                                for hazard in self.hazards.values()
+                            )
+                        )
+                    )
+                )
             case _:
                 assert_never(event)
 
