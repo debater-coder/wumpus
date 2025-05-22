@@ -61,7 +61,7 @@ class Wumpus(Hazard):
         yield from self.startle()
 
     def startle(self) -> Iterator[Event]:
-        if not self.location:
+        if self.location is None:
             raise Exception("Cannot startle Wumpus without location.")
 
         move = choice([*self.level[self.location].tunnels, None])
