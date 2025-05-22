@@ -1,9 +1,9 @@
 from .events import ArrowShot, PlayerKilled, PlayerMoved, PlayerWon, Event
 from .level import Level
 from .cave import Cave
-from .utils import assert_never
 
 from random import choice
+from typing import assert_never
 
 
 class PlayerController:
@@ -20,6 +20,8 @@ class PlayerController:
         self.initial_cave = self.cave
         self.alive = True
         self.win = False
+
+        self.emit_to_level(PlayerMoved(self.cave.location))
 
     def move(self, location: int):
         self.emit_to_level(PlayerMoved(location))

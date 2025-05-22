@@ -17,7 +17,7 @@ if __name__ == "__main__":
     with open("level.json") as fp:
         level_map = fp.read()
 
-    level = Level(level_map)
+    level = Level(level_map, debug=DEBUG)
     player = TextPlayerController(level)
 
     while True:
