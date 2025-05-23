@@ -33,7 +33,7 @@ class PlayerController:
         self.emit_to_level(PlayerMoved(self.cave.location))
 
     def move(self, location: int):
-        self.emit_to_level(PlayerMoved(location))
+        list(self.emit_to_level(PlayerMoved(location)))
 
     def shoot(self, locations: list[int]):
         for location in locations:
