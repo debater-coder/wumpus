@@ -77,6 +77,7 @@ class BottomlessPit(Hazard):
         return "I feel a draft."
 
     def on_player_enter(self):
+        print("You fell into a bottomless pit.")
         yield PlayerKilled()
 
 
