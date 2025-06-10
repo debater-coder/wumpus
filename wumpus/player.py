@@ -30,14 +30,19 @@ class PlayerController:
         self.alive = True
         self.win = False
 
-        self.emit_to_level(PlayerMoved(self.cave.location))
+        list(self.emit_to_level(PlayerMoved(self.cave.location)))
 
     def move(self, location: int):
         list(self.emit_to_level(PlayerMoved(location)))
 
     def shoot(self, locations: list[int]):
         for location in locations:
-            if any([isinstance(event, ArrowHit) for event in self.emit_to_level(ArrowShot(location))]):
+            if any(
+                [
+                    isinstance(event, ArrowHit)
+                    for event in self.emit_to_level(ArrowShot(location))
+                ]
+            ):
                 return
 
         self.emit_to_level(ArrowMissed())
@@ -68,18 +73,9 @@ class PlayerController:
 
         return messages
 
-    def get_action(self):
-        raise NotImplementedError
-
-    def play(self) -> bool:
-        """Play the game, returns whether the game was won or lost."""
-        while self.alive and not self.win:
-            self.get_action()
-
-        return self.win
-
     def respawn(self):
         self.cave = self.initial_cave
+        list(self.emit_to_level(PlayerMoved(self.cave.location)))
         self.alive = True
         self.win = False
 
@@ -96,6 +92,12 @@ def input_location(msg: str, level: dict[int, Cave]):
 
 
 class TextPlayerController(PlayerController):
+    def play(self) -> bool:
+        """Play the game, returns whether the game was won or lost."""
+        while self.alive and not self.win:
+            self.get_action()
+        return self.win
+
     def get_action(self):
         while True:
             print(f"You are in room {self.cave.location}.")

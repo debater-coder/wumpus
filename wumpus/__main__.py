@@ -4,17 +4,24 @@ An implementation of the text adventure game "Hunt the Wumpus".
 """
 
 import argparse
+import random
 from .level import Level
 from .player import TextPlayerController
 
 
 parser = argparse.ArgumentParser(prog="Wumpus OOP")
 parser.add_argument("-d", "--debug", action="store_true")
-DEBUG = parser.parse_args().debug
+parser.add_argument("-s", "--seed")
+args = parser.parse_args()
+DEBUG = args.debug
+SEED = args.seed
 
 
 with open("level.json") as fp:
     level_map = fp.read()
+
+if SEED:
+    random.seed(SEED)
 
 level = Level(level_map, debug=DEBUG)
 player = TextPlayerController(level)
