@@ -27,17 +27,17 @@ class TestPlayerController(unittest.TestCase):
     def test_eaten(self):
         self.player.move(17)
 
-        self.assertFalse(self.player.alive)
-        self.assertFalse(self.player.win)
+        self.assertFalse(self.player.alive, "Player should be dead.")
+        self.assertFalse(self.player.win, "Player should not have won.")
 
     def test_pit(self):
         self.player.move(9)
-        self.assertFalse(self.player.alive)
-        self.assertFalse(self.player.win)
+        self.assertFalse(self.player.alive, "Player should be dead.")
+        self.assertFalse(self.player.win, "Player should not have won.")
 
         # respawn
         self.player.respawn()
-        self.assertEqual(self.player.cave.location, 18)
+        self.assertEqual(self.player.cave.location, 18, "Player should respawn in the same place.")
 
     def test_bats(self):
         self.player.move(19)
@@ -50,10 +50,10 @@ class TestPlayerController(unittest.TestCase):
 
     def test_shoot_self(self):
         self.player.shoot([19, 18])
-        self.assertFalse(self.player.alive)
-        self.assertFalse(self.player.win)
+        self.assertFalse(self.player.alive, "Player should be dead.")
+        self.assertFalse(self.player.win, "Player should not have won.")
 
     def test_shoot_wumpus(self):
         self.player.shoot([17])
-        self.assertTrue(self.player.alive)
-        self.assertTrue(self.player.win)
+        self.assertTrue(self.player.alive, "Player should be alive.")
+        self.assertTrue(self.player.win, "Player should have won.")
