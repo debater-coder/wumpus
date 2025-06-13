@@ -1,8 +1,10 @@
-from random import seed
 import unittest
-from wumpus.level import Level
-from wumpus.player import PlayerController
-from wumpus.cave import Cave
+import wumpus.levels
+import importlib.resources
+
+from random import seed
+
+from wumpus import Level, PlayerController, Cave
 
 
 class TestPlayerController(unittest.TestCase):
@@ -13,8 +15,7 @@ class TestPlayerController(unittest.TestCase):
     """
 
     def setUp(self):
-        with open("level.json") as fp:
-            level_map = fp.read()
+        level_map = importlib.resources.read_text(wumpus.levels, "01.json")
         seed("test")  # this ensures determinism
         self.level = Level(level_map)
         self.player = PlayerController(self.level)

@@ -44,9 +44,16 @@ class TextPlayerController(PlayerController):
 
                     locations = [
                         next_loc
-                        if next_loc in (cave := self.level.get_cave(prev_loc)).tunnels  # ensure that the next cave is adjacent to current cave
-                        else choice(cave.tunnels) # otherwise the arrow should go randomly
-                        for prev_loc, next_loc in zip([self.cave.location] + locations, locations)
+                        if next_loc
+                        in (
+                            cave := self.level.get_cave(prev_loc)
+                        ).tunnels  # ensure that the next cave is adjacent to current cave
+                        else choice(
+                            cave.tunnels
+                        )  # otherwise the arrow should go randomly
+                        for prev_loc, next_loc in zip(
+                            [self.cave.location] + locations, locations
+                        )
                     ]
 
                     self.shoot(locations)
