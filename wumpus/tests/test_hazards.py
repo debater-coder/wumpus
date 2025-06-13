@@ -25,7 +25,8 @@ class TestWumpus(unittest.TestCase):
             enter_events = list(wumpus.on_player_enter())
 
             self.assertIsInstance(enter_events[0], events.PlayerKilled)
-            self.assertIn("EATS YOU UP", enter_events[1])
+            self.assertIsInstance(enter_events[1], str)
+            self.assertIn("EATS YOU UP", typing.cast(str, enter_events[1]))
 
             if len(enter_events) > 2:
                 self.assertEqual(len(enter_events), 3)
