@@ -5,7 +5,7 @@ An implementation of the text adventure game "Hunt the Wumpus".
 
 import argparse
 import random
-from .level import Level
+from wumpus import Level
 from .player import TextPlayerController
 
 

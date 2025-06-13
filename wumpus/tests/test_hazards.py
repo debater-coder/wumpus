@@ -16,7 +16,9 @@ class TestWumpus(unittest.TestCase):
         iterations = 1000
 
         for _ in range(iterations):
-            wumpus = hazards.Wumpus({0: cave.Cave(0, [1, 2, 3])})  # Wumpus spawns in cave 0
+            wumpus = hazards.Wumpus(
+                {0: cave.Cave(0, [1, 2, 3])}
+            )  # Wumpus spawns in cave 0
             wumpus.location = 0
             print(wumpus.location)
 
@@ -35,8 +37,12 @@ class TestWumpus(unittest.TestCase):
                 self.assertEqual(len(enter_events), 1)
                 final_locations[0] += 1
 
-        self.assertAlmostEqual(final_locations[0] / iterations, 0.25, places=1)  # 25% chance of not moving
-        self.assertAlmostEqual(final_locations[1] / iterations, 0.25, places=1)  # 25% for each of the neighbouring caves
+        self.assertAlmostEqual(
+            final_locations[0] / iterations, 0.25, places=1
+        )  # 25% chance of not moving
+        self.assertAlmostEqual(
+            final_locations[1] / iterations, 0.25, places=1
+        )  # 25% for each of the neighbouring caves
         self.assertAlmostEqual(final_locations[2] / iterations, 0.25, places=1)
         self.assertAlmostEqual(final_locations[3] / iterations, 0.25, places=1)
 

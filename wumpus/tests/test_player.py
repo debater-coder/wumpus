@@ -11,6 +11,7 @@ class TestPlayerController(unittest.TestCase):
     test internal details such as event handling, instead testing from the
     PlayerController interface.
     """
+
     def setUp(self):
         with open("level.json") as fp:
             level_map = fp.read()
@@ -19,7 +20,9 @@ class TestPlayerController(unittest.TestCase):
         self.player = PlayerController(self.level)
 
     def test_spawn(self):
-        self.assertListEqual(self.player.get_nearby_msgs(), ["I feel a draft.", "I smell a Wumpus."])
+        self.assertListEqual(
+            self.player.get_nearby_msgs(), ["I feel a draft.", "I smell a Wumpus."]
+        )
         self.assertIsInstance(self.player.cave, Cave)
         self.assertEqual(self.player.cave.location, 18)
         self.assertListEqual(self.player.cave.tunnels, [9, 17, 19])
@@ -37,7 +40,9 @@ class TestPlayerController(unittest.TestCase):
 
         # respawn
         self.player.respawn()
-        self.assertEqual(self.player.cave.location, 18, "Player should respawn in the same place.")
+        self.assertEqual(
+            self.player.cave.location, 18, "Player should respawn in the same place."
+        )
 
     def test_bats(self):
         self.player.move(19)
