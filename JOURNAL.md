@@ -15,3 +15,13 @@
 - Added event based architecture
 - This helped to decouple the Hazards from the Level
 - Handling of player interaction with Hazards was also moved to Level.
+
+## 13/06/2025 git commit hash `9003447fea0d29cc30092adac94c328893a5294f`
+### Tasks completed
+- Complete migration to event based architecture
+- Separate text-based game completely from core logic
+- Add automated black-box testing
+- Fix various edge cases (eg: shooting to room not adjacent to current room)
+- Install pygame to nix shell
+### Future tasks
+- Create graphical package
