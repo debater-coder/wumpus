@@ -5,7 +5,10 @@ An implementation of the text adventure game "Hunt the Wumpus".
 
 import argparse
 import random
+import importlib.resources
+
 from wumpus import Level
+import wumpus.levels
 from .player import TextPlayerController
 
 
@@ -17,13 +20,10 @@ DEBUG = args.debug
 SEED = args.seed
 
 
-with open("level.json") as fp:
-    level_map = fp.read()
-
 if SEED:
     random.seed(SEED)
 
-level = Level(level_map, debug=DEBUG)
+level = Level(importlib.resources.read_text(wumpus.levels, "01.json"), debug=DEBUG)
 player = TextPlayerController(level)
 
 while True:
