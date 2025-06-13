@@ -62,3 +62,6 @@ class TextPlayerController(PlayerController):
                 print("Can't do that!")
             else:
                 print("Can't do that!")
+
+    def handle_msg(self, msg: str):
+        print(msg)

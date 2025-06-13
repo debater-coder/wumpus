@@ -44,7 +44,7 @@ class Level:
 
     def handle_event(
         self, event: Event
-    ) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved | ArrowHit]:
+    ) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved | ArrowHit | str]:
         """
         Handles an event triggered by an object in the game.
 
@@ -97,7 +97,7 @@ class Level:
                 hazard = self.get_hazard_in_cave(self.get_cave(location))
 
                 if location == self.player:
-                    print("Oops... You shot yourself!")
+                    yield "Oops... You shot yourself!"
                     yield PlayerKilled()
                     return
 
@@ -125,6 +125,8 @@ class Level:
                         )
                     )
                 )
+            case str():
+                yield event
             case _:
                 assert_never(event)
 

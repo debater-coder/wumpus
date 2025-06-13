@@ -58,8 +58,13 @@ class PlayerController:
                     self.cave = self.level.get_cave(location)
                 case ArrowHit():
                     yield player_event
+                case str():
+                    self.handle_msg(player_event)
                 case _:
                     assert_never(player_event)
+
+    def handle_msg(self, msg: str):
+        pass
 
     def get_nearby_msgs(self):
         messages: list[str] = []

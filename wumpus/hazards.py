@@ -50,7 +50,7 @@ class Wumpus(Hazard):
 
     def on_player_enter(self):
         yield PlayerKilled()
-        print("Wumpus EATS YOU UP!")
+        yield "Wumpus EATS YOU UP!"
         yield from self.startle()
 
     def on_arrow_enter(self):
@@ -77,7 +77,7 @@ class BottomlessPit(Hazard):
         return "I feel a draft."
 
     def on_player_enter(self):
-        print("You fell into a bottomless pit.")
+        yield "You fell into a bottomless pit."
         yield PlayerKilled()
 
 
@@ -91,5 +91,5 @@ class Superbats(Hazard):
         return "Bats nearby."
 
     def on_player_enter(self):
-        print("ZAP -- Super bat snatch! Elsewhereville for you!")
+        yield "ZAP -- Super bat snatch! Elsewhereville for you!"
         yield PlayerMoved(choice(list(self.level.values())).location)

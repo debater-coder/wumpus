@@ -16,6 +16,7 @@ type Event = (
     | ArrowShot
     | ArrowHit
     | ArrowMissed
+    | str
 )
 
 
