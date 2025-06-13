@@ -42,18 +42,21 @@ class TextPlayerController(PlayerController):
                         for _ in range(rooms)
                     ]
 
-                    locations = [locations[0]] + [
+                    locations = [
                         next_loc
-                        if next_loc in (cave := self.level.get_cave(prev_loc)).tunnels
-                        else choice(cave.tunnels)
-                        for prev_loc, next_loc in zip(locations, locations[1:])
+                        if next_loc in (cave := self.level.get_cave(prev_loc)).tunnels  # ensure that the next cave is adjacent to current cave
+                        else choice(cave.tunnels) # otherwise the arrow should go randomly
+                        for prev_loc, next_loc in zip([self.cave.location] + locations, locations)
                     ]
 
                     self.shoot(locations)
                     break
                 elif action.lower()[0] == "m":
                     location = input_location("Move to? ", self.level.level)
-                    self.move(location)
+                    if location in self.cave.tunnels:
+                        self.move(location)
+                    else:
+                        print("Cannot move to non-adjacent cave")
                     break
             except ValueError:
                 print("Can't do that!")
