@@ -1,25 +1,23 @@
 import pygame as pg
-
-from .colours import COLOURS
+from .scene import SceneManager
+from .scenes.menu import MainMenu
 
 pg.init()
-screen = pg.display.set_mode((1280, 720), pg.SCALED)
+screen = pg.display.set_mode((1920, 1080), pg.SCALED)
 pg.display.set_caption("Wumpus")
-
-background = pg.Surface(screen.get_size()).convert()
-background.fill(COLOURS["stone_900"])
-
-screen.blit(background, (0, 0))
-pg.display.flip()
 
 clock = pg.time.Clock()
 
-running = True
-while running:
+scene_manager = SceneManager()
+scene_manager.push(MainMenu(screen))
+
+while True:
     clock.tick(60)
 
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
+    if pg.event.peek(eventtype=pg.QUIT):
+        break
+
+    scene_manager.handle_pg_events(pg.event.get())
+
 
 pg.quit()

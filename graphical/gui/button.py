@@ -1,0 +1,39 @@
+import pygame as pg
+
+from dataclasses import dataclass
+
+from ..colours import COLOURS
+
+
+@dataclass
+class Button:
+    rect: pg.Rect
+    text: str
+    font: pg.font.Font
+
+    hovered: bool = False
+    bg_colour = COLOURS["stone_800"]
+    text_colour = COLOURS["stone_50"]
+    hover_colour = COLOURS["stone_700"]
+
+    def update(self):
+        self.hovered = self.rect.collidepoint(pg.mouse.get_pos())
+
+        return self.hovered and pg.mouse.get_pressed()[0]
+
+    def paint(self, surface: pg.surface.Surface):
+        background = self.hover_colour if self.hovered else self.bg_colour
+
+        pg.draw.rect(
+            surface, background, self.rect, border_radius=16
+        )
+
+        text_surf = self.font.render(
+            self.text,
+            True,
+            self.text_colour,
+        )
+
+        text_pos = text_surf.get_rect(center=self.rect.center)
+
+        surface.blit(text_surf, text_pos)

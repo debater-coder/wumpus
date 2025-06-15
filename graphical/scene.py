@@ -2,6 +2,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import assert_never
+
 import pygame as pg
 
 type SceneEvent = PushScene | PopScene | SwitchScene
@@ -23,9 +24,6 @@ class SwitchScene:
 
 
 class Scene:
-    def __init__(self):
-        pass
-
     def enter(self):
         pass
 
@@ -40,7 +38,6 @@ class Scene:
 
     def handle_pg_events(self, events: list[pg.event.Event]) -> Iterator[SceneEvent]:
         yield from []
-        pass
 
 
 class SceneManager:
