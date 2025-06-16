@@ -3,10 +3,11 @@ import pygame as pg
 from dataclasses import dataclass
 
 from ..colours import COLOURS
+from .element import Element
 
 
 @dataclass
-class Button:
+class Button(Element):
     rect: pg.Rect
     text: str
     font: pg.font.Font
@@ -24,9 +25,7 @@ class Button:
     def paint(self, surface: pg.surface.Surface):
         background = self.hover_colour if self.hovered else self.bg_colour
 
-        pg.draw.rect(
-            surface, background, self.rect, border_radius=16
-        )
+        pg.draw.rect(surface, background, self.rect, border_radius=16)
 
         text_surf = self.font.render(
             self.text,

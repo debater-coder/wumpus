@@ -5,6 +5,7 @@ in pkgs.mkShell {
     pkgs.python3
     pkgs.python3Packages.pip
     pkgs.python3Packages.pygame
+    pkgs.graphviz
   ];
   shellHook = ''
             alias pip="PIP_PREFIX='$(pwd)/_build/pip_packages' \pip"

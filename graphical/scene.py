@@ -73,13 +73,13 @@ class SceneManager:
         if current := self.current():
             current.resume()
 
-    def switch(self, scene: Scene):
+    def switch(self, new_scene: Scene):
         """Exits all scenes, entering the specied scene"""
         for scene in self.scenes:
             scene.exit()
 
         self.scenes.clear()  # this preserves the reference of the current scene list
-        self.scenes.append(scene)
+        self.push(new_scene)
 
     def handle_pg_events(self, events: list[pg.event.Event]):
         """Passes pygame events to the current scene."""
