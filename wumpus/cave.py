@@ -5,3 +5,4 @@ from dataclasses import dataclass
 class Cave:
     location: int
     tunnels: list[int]
+    coords: tuple[float, float]
