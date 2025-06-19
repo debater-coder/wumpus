@@ -14,7 +14,7 @@ class Paused(Scene):
         self.screen = screen
 
         self.background = pg.Surface(self.screen.get_size()).convert()
-        self.background.fill(COLOURS["stone_900"])
+        self.background.fill(COLOURS["zinc_950"])
 
         font = pg.font.Font(None, 64)
 

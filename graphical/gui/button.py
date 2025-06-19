@@ -13,9 +13,9 @@ class Button(Element):
     font: pg.font.Font
 
     hovered: bool = False
-    bg_colour = COLOURS["stone_800"]
-    text_colour = COLOURS["stone_50"]
-    hover_colour = COLOURS["stone_700"]
+    bg_colour = COLOURS["zinc_900"]
+    text_colour = COLOURS["zinc_50"]
+    hover_colour = COLOURS["zinc_800"]
 
     def update(self, up: bool):
         self.hovered = self.rect.collidepoint(pg.mouse.get_pos())

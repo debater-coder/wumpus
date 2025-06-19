@@ -27,7 +27,7 @@ class MainMenu(Scene):
         self.stack = VStack(self.buttons, width=600, gap=20)
 
         self.background = pg.Surface(self.screen.get_size()).convert()
-        self.background.fill(COLOURS["stone_900"])
+        self.background.fill(COLOURS["zinc_950"])
 
     def update(self) -> Iterator[SceneEvent]:
         self.stack.rect.center = self.screen.get_rect().center

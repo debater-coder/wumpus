@@ -13,11 +13,11 @@ class Playing(Scene):
         self.level_index = level_index
 
         self.background = pg.Surface(self.screen.get_size()).convert()
-        self.background.fill(COLOURS["stone_900"])
+        self.background.fill(COLOURS["zinc_950"])
 
         font = pg.font.Font(None, 64)
 
-        self.text = font.render(f"Level {level_index + 1}", True, COLOURS["stone_50"])
+        self.text = font.render(f"Level {level_index + 1}", True, COLOURS["zinc_50"])
 
     def update(self) -> Iterator[SceneEvent]:
         for event in pg.event.get(eventtype=pg.KEYUP):

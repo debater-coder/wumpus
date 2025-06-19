@@ -15,7 +15,7 @@ class HowToPlay(Scene):
         self.back = Button(pg.Rect(40, 40, 300, 80), "Back", font)
 
         self.background = pg.Surface(self.screen.get_size()).convert()
-        self.background.fill(COLOURS["stone_900"])
+        self.background.fill(COLOURS["zinc_950"])
 
     def handle_pg_events(self):
         self.screen.blit(self.background, (0, 0))
