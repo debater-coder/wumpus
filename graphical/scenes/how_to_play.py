@@ -1,7 +1,9 @@
 import pygame as pg
 
+from ..utils import button_up
+
 from ..scene import PopScene, Scene
-from ..gui.button import Button
+from ..gui import Button
 from ..colours import COLOURS
 
 
@@ -15,9 +17,9 @@ class HowToPlay(Scene):
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["stone_900"])
 
-    def handle_pg_events(self, events: list[pg.event.Event]):
+    def handle_pg_events(self):
         self.screen.blit(self.background, (0, 0))
-        if self.back.update():
+        if self.back.update(button_up()):
             yield PopScene()
 
         self.back.paint(self.screen)

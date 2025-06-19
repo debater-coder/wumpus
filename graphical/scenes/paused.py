@@ -1,46 +1,47 @@
 from collections.abc import Iterator
 import pygame as pg
 
+from ..scene import PopScene, PushScene, Scene, SceneEvent, SwitchScene
+from ..colours import COLOURS
+from ..gui import Button, VStack
 from ..utils import button_up
 
-from ..scene import PushScene, Scene, SceneEvent, SwitchScene
-
 from .how_to_play import HowToPlay
-from .level_select import LevelSelect
-
-from ..gui import Button, VStack
-
-from ..colours import COLOURS
 
 
-class MainMenu(Scene):
-    """The main menu scene, with two buttons for a help menu and level selector."""
-
+class Paused(Scene):
     def __init__(self, screen: pg.surface.Surface):
         self.screen = screen
-        font = pg.font.Font(None, 64)
-
-        self.buttons = [
-            Button(pg.Rect(0, 0, 0, 80), "Level Select", font),
-            Button(pg.Rect(0, 0, 0, 80), "How to Play", font),
-        ]
-        self.stack = VStack(self.buttons, width=600, gap=20)
 
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["stone_900"])
 
+        font = pg.font.Font(None, 64)
+
+        self.buttons = [
+            Button(pg.Rect(0, 0, 0, 80), "Resume Game", font),
+            Button(pg.Rect(0, 0, 0, 80), "How to Play", font),
+            Button(pg.Rect(0, 0, 0, 80), "Exit to Main Menu", font),
+        ]
+        self.stack = VStack(self.buttons, width=600, gap=20)
+
     def update(self) -> Iterator[SceneEvent]:
         self.stack.rect.center = self.screen.get_rect().center
         self.stack.update()
+
         up = button_up()
+        resume, help, menu = [button.update(up) for button in self.buttons]
 
-        level_select, how_to_play = [button.update(up) for button in self.buttons]
+        if resume:
+            yield PopScene()
 
-        if level_select:
-            yield SwitchScene(LevelSelect(self.screen))
-
-        if how_to_play:
+        if help:
             yield PushScene(HowToPlay(self.screen))
+
+        if menu:
+            from .menu import MainMenu
+
+            yield SwitchScene(MainMenu(self.screen))
 
     def paint(self):
         self.screen.blit(self.background, (0, 0))
@@ -50,6 +51,6 @@ class MainMenu(Scene):
 
         pg.display.flip()
 
-    def handle_pg_events(self):
+    def handle_pg_events(self) -> Iterator[SceneEvent]:
         yield from self.update()
         self.paint()

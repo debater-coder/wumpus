@@ -17,10 +17,10 @@ class Button(Element):
     text_colour = COLOURS["stone_50"]
     hover_colour = COLOURS["stone_700"]
 
-    def update(self):
+    def update(self, up: bool):
         self.hovered = self.rect.collidepoint(pg.mouse.get_pos())
 
-        return self.hovered and pg.mouse.get_pressed()[0]
+        return self.hovered and up
 
     def paint(self, surface: pg.surface.Surface):
         background = self.hover_colour if self.hovered else self.bg_colour

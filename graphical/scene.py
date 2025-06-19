@@ -3,8 +3,6 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import assert_never
 
-import pygame as pg
-
 type SceneEvent = PushScene | PopScene | SwitchScene
 
 
@@ -36,7 +34,7 @@ class Scene:
     def resume(self):
         pass
 
-    def handle_pg_events(self, events: list[pg.event.Event]) -> Iterator[SceneEvent]:
+    def handle_pg_events(self) -> Iterator[SceneEvent]:
         yield from []
 
 
@@ -81,12 +79,12 @@ class SceneManager:
         self.scenes.clear()  # this preserves the reference of the current scene list
         self.push(new_scene)
 
-    def handle_pg_events(self, events: list[pg.event.Event]):
+    def handle_pg_events(self):
         """Passes pygame events to the current scene."""
         if not (current := self.current()):
             return
 
-        for event in current.handle_pg_events(events):
+        for event in current.handle_pg_events():
             match event:
                 case PopScene():
                     self.pop()

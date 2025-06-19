@@ -17,7 +17,8 @@ while True:
     if pg.event.peek(eventtype=pg.QUIT):
         break
 
-    scene_manager.handle_pg_events(pg.event.get())
+    scene_manager.handle_pg_events()
+    pg.event.pump()
 
 
 pg.quit()
