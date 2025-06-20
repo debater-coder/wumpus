@@ -1,0 +1,62 @@
+@startuml packages
+set namespaceSeparator none
+package "graphical" as graphical {
+}
+package "graphical.__main__" as graphical.__main__ {
+}
+package "graphical.colours" as graphical.colours {
+}
+package "graphical.gui" as graphical.gui {
+}
+package "graphical.gui.button" as graphical.gui.button {
+}
+package "graphical.gui.element" as graphical.gui.element {
+}
+package "graphical.gui.vstack" as graphical.gui.vstack {
+}
+package "graphical.scene" as graphical.scene {
+}
+package "graphical.utils" as graphical.utils {
+}
+package "wumpus" as wumpus {
+}
+package "wumpus.cave" as wumpus.cave {
+}
+package "wumpus.events" as wumpus.events {
+}
+package "wumpus.hazards" as wumpus.hazards {
+}
+package "wumpus.level" as wumpus.level {
+}
+package "wumpus.levels" as wumpus.levels {
+}
+package "wumpus.player" as wumpus.player {
+}
+package "wumpus.tests" as wumpus.tests {
+}
+package "wumpus.tests.test_hazards" as wumpus.tests.test_hazards {
+}
+package "wumpus.tests.test_player" as wumpus.tests.test_player {
+}
+graphical.__main__ --> graphical.scene
+graphical.gui --> graphical.gui.button
+graphical.gui --> graphical.gui.vstack
+graphical.gui.button --> graphical.gui.element
+graphical.gui.vstack --> graphical.gui.element
+wumpus --> wumpus.cave
+wumpus --> wumpus.level
+wumpus --> wumpus.player
+wumpus.hazards --> wumpus.cave
+wumpus.hazards --> wumpus.events
+wumpus.level --> wumpus.cave
+wumpus.level --> wumpus.events
+wumpus.level --> wumpus.hazards
+wumpus.player --> wumpus.events
+wumpus.player --> wumpus.level
+wumpus.tests.test_hazards --> wumpus
+wumpus.tests.test_hazards --> wumpus.cave
+wumpus.tests.test_hazards --> wumpus.events
+wumpus.tests.test_hazards --> wumpus.hazards
+wumpus.tests.test_player --> wumpus
+wumpus.tests.test_player --> wumpus.levels
+@enduml

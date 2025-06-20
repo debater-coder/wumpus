@@ -1,0 +1,30 @@
+digraph "classes" {
+rankdir=BT
+charset="utf-8"
+"wumpus.events.ArrowHit" [color="black", fontcolor="black", label=<{ArrowHit|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.events.ArrowMissed" [color="black", fontcolor="black", label=<{ArrowMissed|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.events.ArrowShot" [color="black", fontcolor="black", label=<{ArrowShot|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.hazards.BottomlessPit" [color="black", fontcolor="black", label=<{BottomlessPit|location<br ALIGN="LEFT"/>|nearby_msg()<br ALIGN="LEFT"/>on_player_enter()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.cave.Cave" [color="black", fontcolor="black", label=<{Cave|coords : tuple[float, float]<br ALIGN="LEFT"/>location : int<br ALIGN="LEFT"/>tunnels : list[int]<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.events.EntityMoved" [color="black", fontcolor="black", label=<{EntityMoved|location : int<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.hazards.Hazard" [color="black", fontcolor="black", label=<{Hazard|level : dict[int, Cave]<br ALIGN="LEFT"/>location : int \| None<br ALIGN="LEFT"/>|nearby_msg(): str<br ALIGN="LEFT"/>on_arrow_enter(): Iterator[Event]<br ALIGN="LEFT"/>on_arrow_miss(): Iterator[Event]<br ALIGN="LEFT"/>on_player_enter(): Iterator[Event]<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.level.Level" [color="black", fontcolor="black", label=<{Level|debug : bool<br ALIGN="LEFT"/>hazards : dict[int, Hazard]<br ALIGN="LEFT"/>level : dict[int, Cave]<br ALIGN="LEFT"/>player : int \| None<br ALIGN="LEFT"/>|choose_empty_cave(): Cave<br ALIGN="LEFT"/>get_cave(location: int): Cave<br ALIGN="LEFT"/>get_hazard_in_cave(cave: Cave): Hazard \| None<br ALIGN="LEFT"/>get_wumpus_location(): int<br ALIGN="LEFT"/>handle_event(event: Event): Iterator[PlayerKilled \| PlayerWon \| PlayerMoved \| ArrowHit \| str]<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.player.PlayerController" [color="black", fontcolor="black", label=<{PlayerController|alive : bool<br ALIGN="LEFT"/>cave<br ALIGN="LEFT"/>initial_cave<br ALIGN="LEFT"/>level<br ALIGN="LEFT"/>win : bool<br ALIGN="LEFT"/>|emit_to_level(event: Event): Iterator[ArrowHit]<br ALIGN="LEFT"/>get_nearby_msgs()<br ALIGN="LEFT"/><I>handle_msg</I>(msg: str)<br ALIGN="LEFT"/>move(location: int)<br ALIGN="LEFT"/>respawn()<br ALIGN="LEFT"/>shoot(locations: list[int])<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.events.PlayerKilled" [color="black", fontcolor="black", label=<{PlayerKilled|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.events.PlayerMoved" [color="black", fontcolor="black", label=<{PlayerMoved|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.events.PlayerWon" [color="black", fontcolor="black", label=<{PlayerWon|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.hazards.Superbats" [color="black", fontcolor="black", label=<{Superbats|location<br ALIGN="LEFT"/>|nearby_msg()<br ALIGN="LEFT"/>on_player_enter()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.tests.test_player.TestPlayerController" [color="black", fontcolor="black", label=<{TestPlayerController|level<br ALIGN="LEFT"/>player<br ALIGN="LEFT"/>|setUp()<br ALIGN="LEFT"/>test_bats()<br ALIGN="LEFT"/>test_eaten()<br ALIGN="LEFT"/>test_pit()<br ALIGN="LEFT"/>test_shoot_self()<br ALIGN="LEFT"/>test_shoot_wumpus()<br ALIGN="LEFT"/>test_spawn()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.tests.test_hazards.TestWumpus" [color="black", fontcolor="black", label=<{TestWumpus|<br ALIGN="LEFT"/>|test_enter()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.hazards.Wumpus" [color="black", fontcolor="black", label=<{Wumpus|location : int<br ALIGN="LEFT"/>|nearby_msg()<br ALIGN="LEFT"/>on_arrow_enter()<br ALIGN="LEFT"/>on_arrow_miss()<br ALIGN="LEFT"/>on_player_enter()<br ALIGN="LEFT"/>startle(): Iterator[Event]<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"wumpus.events.WumpusMoved" [color="black", fontcolor="black", label=<{WumpusMoved|<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"wumpus.events.ArrowShot" -> "wumpus.events.EntityMoved" [arrowhead="empty", arrowtail="none"];
+"wumpus.events.PlayerMoved" -> "wumpus.events.EntityMoved" [arrowhead="empty", arrowtail="none"];
+"wumpus.events.WumpusMoved" -> "wumpus.events.EntityMoved" [arrowhead="empty", arrowtail="none"];
+"wumpus.hazards.BottomlessPit" -> "wumpus.hazards.Hazard" [arrowhead="empty", arrowtail="none"];
+"wumpus.hazards.Superbats" -> "wumpus.hazards.Hazard" [arrowhead="empty", arrowtail="none"];
+"wumpus.hazards.Wumpus" -> "wumpus.hazards.Hazard" [arrowhead="empty", arrowtail="none"];
+"wumpus.level.Level" -> "wumpus.tests.test_player.TestPlayerController" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="level", style="solid"];
+"wumpus.player.PlayerController" -> "wumpus.tests.test_player.TestPlayerController" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="player", style="solid"];
+"wumpus.level.Level" -> "wumpus.player.PlayerController" [arrowhead="odiamond", arrowtail="none", fontcolor="green", label="level", style="solid"];
+}

@@ -1,0 +1,145 @@
+@startuml classes
+set namespaceSeparator none
+class "ArrowHit" as wumpus.events.ArrowHit {
+}
+class "ArrowMissed" as wumpus.events.ArrowMissed {
+}
+class "ArrowShot" as wumpus.events.ArrowShot {
+}
+class "BottomlessPit" as wumpus.hazards.BottomlessPit {
+  location
+  nearby_msg()
+  on_player_enter()
+}
+class "Button" as graphical.gui.button.Button {
+  bg_colour : tuple
+  font
+  hover_colour : tuple
+  hovered : bool
+  rect
+  text : str
+  text_colour : tuple
+  paint(surface: pg.surface.Surface)
+  update(up: bool)
+}
+class "Cave" as wumpus.cave.Cave {
+  coords : tuple[float, float]
+  location : int
+  tunnels : list[int]
+}
+class "Element" as graphical.gui.element.Element {
+  rect
+}
+class "EntityMoved" as wumpus.events.EntityMoved {
+  location : int
+}
+class "Hazard" as wumpus.hazards.Hazard {
+  level : dict[int, Cave]
+  location : int | None
+  nearby_msg() -> str
+  on_arrow_enter() -> Iterator[Event]
+  on_arrow_miss() -> Iterator[Event]
+  on_player_enter() -> Iterator[Event]
+}
+class "Level" as wumpus.level.Level {
+  debug : bool
+  hazards : dict[int, Hazard]
+  level : dict[int, Cave]
+  player : int | None
+  choose_empty_cave() -> Cave
+  get_cave(location: int) -> Cave
+  get_hazard_in_cave(cave: Cave) -> Hazard | None
+  get_wumpus_location() -> int
+  handle_event(event: Event) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved | ArrowHit | str]
+}
+class "PlayerController" as wumpus.player.PlayerController {
+  alive : bool
+  cave
+  initial_cave
+  level
+  win : bool
+  emit_to_level(event: Event) -> Iterator[ArrowHit]
+  get_nearby_msgs()
+  {abstract}handle_msg(msg: str)
+  move(location: int)
+  respawn()
+  shoot(locations: list[int])
+}
+class "PlayerKilled" as wumpus.events.PlayerKilled {
+}
+class "PlayerMoved" as wumpus.events.PlayerMoved {
+}
+class "PlayerWon" as wumpus.events.PlayerWon {
+}
+class "PopScene" as graphical.scene.PopScene {
+}
+class "PushScene" as graphical.scene.PushScene {
+  scene
+}
+class "Scene" as graphical.scene.Scene {
+  {abstract}enter()
+  {abstract}exit()
+  handle_pg_events() -> Iterator[SceneEvent]
+  {abstract}pause()
+  {abstract}resume()
+}
+class "SceneManager" as graphical.scene.SceneManager {
+  scenes : list[Scene]
+  current()
+  handle_pg_events()
+  pop()
+  push(scene: Scene)
+  switch(new_scene: Scene)
+}
+class "Superbats" as wumpus.hazards.Superbats {
+  location
+  nearby_msg()
+  on_player_enter()
+}
+class "SwitchScene" as graphical.scene.SwitchScene {
+  scene
+}
+class "TestPlayerController" as wumpus.tests.test_player.TestPlayerController {
+  level
+  player
+  setUp()
+  test_bats()
+  test_eaten()
+  test_pit()
+  test_shoot_self()
+  test_shoot_wumpus()
+  test_spawn()
+}
+class "TestWumpus" as wumpus.tests.test_hazards.TestWumpus {
+  test_enter()
+}
+class "VStack" as graphical.gui.vstack.VStack {
+  elements : Sequence[Element]
+  gap : int
+  rect
+  width : int
+  update()
+}
+class "Wumpus" as wumpus.hazards.Wumpus {
+  location : int
+  nearby_msg()
+  on_arrow_enter()
+  on_arrow_miss()
+  on_player_enter()
+  startle() -> Iterator[Event]
+}
+class "WumpusMoved" as wumpus.events.WumpusMoved {
+}
+graphical.gui.button.Button --|> graphical.gui.element.Element
+wumpus.events.ArrowShot --|> wumpus.events.EntityMoved
+wumpus.events.PlayerMoved --|> wumpus.events.EntityMoved
+wumpus.events.WumpusMoved --|> wumpus.events.EntityMoved
+wumpus.hazards.BottomlessPit --|> wumpus.hazards.Hazard
+wumpus.hazards.Superbats --|> wumpus.hazards.Hazard
+wumpus.hazards.Wumpus --|> wumpus.hazards.Hazard
+graphical.scene.Scene --* graphical.scene.PushScene : scene
+graphical.scene.Scene --* graphical.scene.SwitchScene : scene
+wumpus.level.Level --* wumpus.tests.test_player.TestPlayerController : level
+wumpus.player.PlayerController --* wumpus.tests.test_player.TestPlayerController : player
+wumpus.level.Level --o wumpus.player.PlayerController : level
+@enduml

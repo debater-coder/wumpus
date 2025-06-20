@@ -1,5 +1,9 @@
 from collections.abc import Iterator
 import pygame as pg
+import importlib.resources
+
+from wumpus import Level
+import wumpus.levels
 
 from ..scene import PushScene, Scene, SceneEvent
 from ..colours import COLOURS
@@ -19,6 +23,9 @@ class Playing(Scene):
 
         self.text = font.render(f"Level {level_index + 1}", True, COLOURS["zinc_50"])
 
+        self.map = importlib.resources.read_text(wumpus.levels, f"{level_index:02}.json")
+        self.level = Level(self.map)
+
     def update(self) -> Iterator[SceneEvent]:
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
@@ -30,6 +37,14 @@ class Playing(Scene):
         self.screen.blit(
             self.text, self.text.get_rect(center=self.screen.get_rect().center)
         )
+
+
+        for cave in (caves := self.level.level).values():
+            for edge in cave.tunnels:
+                pg.draw.line(self.screen, COLOURS["zinc_50"], pg.Vector2(caves[edge].coords) + pg.Vector2(1920, 1080) / 2, pg.Vector2(cave.coords) + pg.Vector2(1920, 1080) / 2)
+
+        for cave in caves.values():
+            pg.draw.circle(self.screen, COLOURS["zinc_900"], pg.Vector2(cave.coords) + pg.Vector2(1920, 1080) / 2, 50)
 
         pg.display.flip()
 

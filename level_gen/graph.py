@@ -9,7 +9,7 @@ class Node:
     edges: list[int]
     vector: pg.Vector2
 
-def force_directed_layout(graph: dict[int, Node], iterations=100, step=0.05):
+def force_directed_layout(graph: dict[int, Node], iterations=1000, step=0.05):
     k = math.sqrt(1920 * 1080 / len(graph))
 
     for _ in range(iterations):

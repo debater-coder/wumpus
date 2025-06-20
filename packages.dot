@@ -1,0 +1,30 @@
+digraph "packages" {
+rankdir=BT
+charset="utf-8"
+"wumpus" [color="black", label=<wumpus>, shape="box", style="solid"];
+"wumpus.cave" [color="black", label=<wumpus.cave>, shape="box", style="solid"];
+"wumpus.events" [color="black", label=<wumpus.events>, shape="box", style="solid"];
+"wumpus.hazards" [color="black", label=<wumpus.hazards>, shape="box", style="solid"];
+"wumpus.level" [color="black", label=<wumpus.level>, shape="box", style="solid"];
+"wumpus.levels" [color="black", label=<wumpus.levels>, shape="box", style="solid"];
+"wumpus.player" [color="black", label=<wumpus.player>, shape="box", style="solid"];
+"wumpus.tests" [color="black", label=<wumpus.tests>, shape="box", style="solid"];
+"wumpus.tests.test_hazards" [color="black", label=<wumpus.tests.test_hazards>, shape="box", style="solid"];
+"wumpus.tests.test_player" [color="black", label=<wumpus.tests.test_player>, shape="box", style="solid"];
+"wumpus" -> "wumpus.cave" [arrowhead="open", arrowtail="none"];
+"wumpus" -> "wumpus.level" [arrowhead="open", arrowtail="none"];
+"wumpus" -> "wumpus.player" [arrowhead="open", arrowtail="none"];
+"wumpus.hazards" -> "wumpus.cave" [arrowhead="open", arrowtail="none"];
+"wumpus.hazards" -> "wumpus.events" [arrowhead="open", arrowtail="none"];
+"wumpus.level" -> "wumpus.cave" [arrowhead="open", arrowtail="none"];
+"wumpus.level" -> "wumpus.events" [arrowhead="open", arrowtail="none"];
+"wumpus.level" -> "wumpus.hazards" [arrowhead="open", arrowtail="none"];
+"wumpus.player" -> "wumpus.events" [arrowhead="open", arrowtail="none"];
+"wumpus.player" -> "wumpus.level" [arrowhead="open", arrowtail="none"];
+"wumpus.tests.test_hazards" -> "wumpus" [arrowhead="open", arrowtail="none"];
+"wumpus.tests.test_hazards" -> "wumpus.cave" [arrowhead="open", arrowtail="none"];
+"wumpus.tests.test_hazards" -> "wumpus.events" [arrowhead="open", arrowtail="none"];
+"wumpus.tests.test_hazards" -> "wumpus.hazards" [arrowhead="open", arrowtail="none"];
+"wumpus.tests.test_player" -> "wumpus" [arrowhead="open", arrowtail="none"];
+"wumpus.tests.test_player" -> "wumpus.levels" [arrowhead="open", arrowtail="none"];
+}
