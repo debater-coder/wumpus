@@ -25,7 +25,10 @@ class Level:
         self.debug = debug
         level = json.loads(level_map)
         self.level: dict[int, Cave] = {
-            cave["location"]: Cave(cave["location"], cave["tunnels"], tuple(cave["coords"])) for cave in level
+            cave["location"]: Cave(
+                cave["location"], cave["tunnels"], tuple(cave["coords"])
+            )
+            for cave in level
         }
         self.hazards: dict[int, Hazard] = {}
         self.player: int | None = None

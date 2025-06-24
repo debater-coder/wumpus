@@ -1,103 +1,58 @@
-# TODO: use actual dodecahedron coordinates
-import pygame as pg
+# Generates coordinates of dodecahedron
+# https://stackoverflow.com/questions/10460337/how-to-generate-calculate-vertices-of-dodecahedron
+import math
 import json
-import random
+from dataclasses import dataclass
+import pygame as pg
 
-from level_gen.graph import Node, force_directed_layout
+SCALE = 250
+
+@dataclass
+class Node:
+    index: int
+    edges: list[int]
+    vector: pg.Vector3
 
 
-caves = [
-  {
-    "location": 1,
-    "tunnels": [2, 5, 8]
-  },
-  {
-    "location": 2,
-    "tunnels": [1, 3, 10]
-  },
-  {
-    "location": 3,
-    "tunnels": [2, 4, 12]
-  },
-  {
-    "location": 4,
-    "tunnels": [3, 5, 14]
-  },
-  {
-    "location": 5,
-    "tunnels": [1, 4, 6]
-  },
-  {
-    "location": 6,
-    "tunnels": [5, 7, 15]
-  },
-  {
-    "location": 7,
-    "tunnels": [6, 8, 17]
-  },
-  {
-    "location": 8,
-    "tunnels": [1, 7, 9]
-  },
-  {
-    "location": 9,
-    "tunnels": [8, 10, 18]
-  },
-  {
-    "location": 10,
-    "tunnels": [2, 9, 11]
-  },
-  {
-    "location": 11,
-    "tunnels": [10, 12, 19]
-  },
-  {
-    "location": 12,
-    "tunnels": [3, 11, 13]
-  },
-  {
-    "location": 13,
-    "tunnels": [12, 14, 20]
-  },
-  {
-    "location": 14,
-    "tunnels": [4, 13, 15]
-  },
-  {
-    "location": 15,
-    "tunnels": [6, 14, 16]
-  },
-  {
-    "location": 16,
-    "tunnels": [15, 17, 20]
-  },
-  {
-    "location": 17,
-    "tunnels": [7, 16, 18]
-  },
-  {
-    "location": 18,
-    "tunnels": [9, 17, 19]
-  },
-  {
-    "location": 19,
-    "tunnels": [11, 18, 20]
-  },
-  {
-    "location": 20,
-    "tunnels": [13, 16, 19]
-  }
-]
+phi = (1 + math.sqrt(5)) / 2
 
-graph = {cave["location"]: Node(index=cave["location"], edges=cave["tunnels"], vector=pg.Vector2(random.uniform(-50, 50), random.uniform(-50, 50))) for cave in caves}
+coords: list[pg.Vector3] = []
+plus_or_minus = (-1, 1)
 
-force_directed_layout(graph)
+# cube
+for x in plus_or_minus:
+    for y in plus_or_minus:
+        for z in plus_or_minus:
+            coords.append(pg.Vector3(x, y, z))
+
+for a in plus_or_minus:
+    for b in plus_or_minus:
+        coords.append(pg.Vector3(0, a / phi, b * phi))
+        coords.append(pg.Vector3(a / phi, b * phi, 0))
+        coords.append(pg.Vector3(a * phi, 0, b / phi))
+
+edge_length = 2 / phi
+
+
+nodes: list[Node] = []
+for i, a in enumerate(coords):
+    edges = []
+    for j, b in enumerate(coords):
+        if i == j:
+            continue
+        if abs(a.distance_to(b) - edge_length) < 1e-2:
+            edges.append(j)
+
+    nodes.append(Node(i, edges, a))
+
+
+# export nodes to JSON
 
 with open("dodecahedron.json", "w") as fp:
-   json.dump([
-       {
-           "location": node.index,
-           "tunnels": node.edges,
-           "coords": (node.vector.x, node.vector.y)
-       } for node in graph.values()
-   ], fp)
+    json.dump(
+        [
+            {"location": node.index, "tunnels": node.edges, "coords": list(node.vector * SCALE)}
+            for node in nodes
+        ],
+        fp,
+    )
