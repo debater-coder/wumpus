@@ -3,7 +3,6 @@ import pygame as pg
 import numpy as np
 import math
 import importlib.resources
-from time import sleep
 
 from wumpus import Level
 import wumpus.levels
