@@ -5,7 +5,8 @@ import json
 from dataclasses import dataclass
 import pygame as pg
 
-SCALE = 250
+SCALE = 1
+
 
 @dataclass
 class Node:
@@ -51,7 +52,11 @@ for i, a in enumerate(coords):
 with open("dodecahedron.json", "w") as fp:
     json.dump(
         [
-            {"location": node.index, "tunnels": node.edges, "coords": list(node.vector * SCALE)}
+            {
+                "location": node.index,
+                "tunnels": node.edges,
+                "coords": list(node.vector * SCALE),
+            }
             for node in nodes
         ],
         fp,

@@ -15,7 +15,7 @@ class TestPlayerController(unittest.TestCase):
     """
 
     def setUp(self):
-        level_map = importlib.resources.read_text(wumpus.levels, "01.json")
+        level_map = importlib.resources.read_text(wumpus.levels, "00.json")
         seed("test")  # this ensures determinism
         self.level = Level(level_map)
         self.player = PlayerController(self.level)

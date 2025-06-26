@@ -23,7 +23,7 @@ SEED = args.seed
 if SEED:
     random.seed(SEED)
 
-level_map = importlib.resources.read_text(wumpus.levels, "01.json")
+level_map = importlib.resources.read_text(wumpus.levels, "00.json")
 level = Level(level_map, debug=DEBUG)
 player = TextPlayerController(level)
 

@@ -1,15 +1,25 @@
 let
   pkgs = import <nixpkgs> {};
 in pkgs.mkShell {
-  buildInputs = [
-    pkgs.python3
-    pkgs.python3Packages.pip
-    pkgs.python3Packages.pygame
-    pkgs.graphviz
-  ];
-  shellHook = ''
-            alias pip="PIP_PREFIX='$(pwd)/_build/pip_packages' \pip"
-            export PYTHONPATH="$(pwd)/_build/pip_packages/lib/python3.7/site-packages:$PYTHONPATH"
-            unset SOURCE_DATE_EPOCH
-  '';
+  packages = [
+      (pkgs.python3.withPackages (python-pkgs: with python-pkgs; [
+        pygame
+        numpy
+        sympy
+        numba
+        anywidget
+        (
+          buildPythonPackage rec {
+            pname = "kingdon";
+            version = "1.3.1";
+            src = fetchPypi {
+              inherit pname version;
+              sha256 = "sha256-5jNVXoUmkl/80vQdt3TKCnICbCcaHJSJfm/9smmj/mU=";
+            };
+            doCheck = false;
+          }
+        )
+      ]))
+      pkgs.graphviz
+    ];
 }
