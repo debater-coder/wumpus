@@ -7,10 +7,10 @@ import importlib.resources
 from wumpus import Level
 import wumpus.levels
 
-from ..scene import PushScene, Scene, SceneEvent
-from ..colours import COLOURS
+from graphical.scene import PushScene, Scene, SceneEvent
+from graphical.colours import COLOURS
 
-from .paused import Paused
+from graphical.scenes.paused import Paused
 
 
 class Playing(Scene):
@@ -23,7 +23,7 @@ class Playing(Scene):
 
         font = pg.font.Font(None, 64)
 
-        self.text = font.render(f"Level {level_index + 1}", True, COLOURS["zinc_50"])
+        self.text = font.render(f"Level {level_index + 1}", True, COLOURS["zinc_600"])
 
         self.map = importlib.resources.read_text(
             wumpus.levels, f"{level_index:02}.json"
@@ -80,9 +80,12 @@ class Playing(Scene):
                 )
                 drawn.add((edge, cave.location))
 
+            print(self.perp_dist(cave.coords))
             pg.draw.circle(
                 self.screen,
-                COLOURS["amber_900"],
+                pg.Color(COLOURS["amber_900"]).lerp(
+                    (0, 0, 0, 0), max(0, min(0.5, self.perp_dist(cave.coords) / 2 - 2))
+                ),
                 pg.Vector2(self.project(cave.coords)),
                 self.project_radius(100, cave.coords),
             )
