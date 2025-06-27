@@ -10,30 +10,28 @@ def button_up():
     )
 
 
-def apply_opacity(color, opacity: float) -> pg.Color:
+def apply_fade(color, fade_factor: float) -> pg.Color:
     """
-    Apply opacity to a color, only affecting the alpha channel.
+    Apply fading effect by lerping to black (since pg.draw doesn't support alpha).
     
     Args:
         color: Base color (RGB tuple or pygame Color)
-        opacity: Opacity value from 0.0 (transparent) to 1.0 (opaque)
+        fade_factor: Fade value from 0.0 (black) to 1.0 (original color)
         
     Returns:
-        Color with specified opacity applied
+        Color lerped towards black based on fade factor
         
     Examples:
-        # Make a color 50% transparent
-        semi_transparent = apply_opacity((255, 0, 0), 0.5)  # Red with 50% opacity
+        # Make a color 50% faded
+        semi_faded = apply_fade((255, 0, 0), 0.5)  # Red faded to darker red
         
-        # Make a color fully opaque
-        opaque = apply_opacity((0, 255, 0), 1.0)  # Green with full opacity
+        # Keep original color
+        bright = apply_fade((0, 255, 0), 1.0)  # Green unchanged
         
-        # Make a color nearly transparent
-        faded = apply_opacity((0, 0, 255), 0.1)  # Blue with 10% opacity
+        # Make a color very dark
+        dark = apply_fade((0, 0, 255), 0.1)  # Blue nearly black
     """
-    result_color = pg.Color(color)
-    result_color.a = int(255 * max(0.0, min(1.0, opacity)))
-    return result_color
+    return pg.Color(color).lerp((0, 0, 0), 1.0 - max(0.0, min(1.0, fade_factor)))
 
 
 

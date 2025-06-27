@@ -8,7 +8,7 @@ from wumpus.hazards import BottomlessPit, Superbats, Wumpus
 from wumpus.level import Level
 
 from graphical.colours import COLOURS
-from graphical.utils import apply_opacity
+from graphical.utils import apply_fade
 
 
 class Renderer:
@@ -89,19 +89,19 @@ class Renderer:
         """Get the roated nD coordinates of a coordinate."""
         return self.vector_from_multivector(self.rotor >> self.algebra.vector(coord))
 
-    def apply_depth_opacity(self, color, coords: npt.NDArray) -> pg.Color:
+    def apply_depth_fade(self, color, coords: npt.NDArray) -> pg.Color:
         """
-        Apply depth-based opacity to a color for 3D rendering effects.
-
+        Apply depth-based darkening to a color for 3D rendering effects.
+        
         Args:
             color: Base color (RGB tuple or pygame Color)
             coords: 3D coordinates where the last component is depth (z-axis)
-
+            
         Returns:
-            Color with depth-based transparency applied
+            Color darkened based on depth
         """
-        depth_opacity = 1.0 - max(0, min(0.5, coords[-1]))
-        return apply_opacity(color, depth_opacity)
+        depth_fade = max(0, min(0.5, coords[-1]))
+        return apply_fade(color, 1.0 - depth_fade)
 
     def load_icons(self):
         """Load hazard icons from files."""
@@ -138,7 +138,7 @@ class Renderer:
             outline_layers.append((COLOURS["zinc_600"], radius + 5))
 
         for color, layer_radius in outline_layers:
-            tinted_color = self.apply_depth_opacity(color, coords)
+            tinted_color = self.apply_depth_fade(color, coords)
             pg.draw.circle(surf, tinted_color, center, layer_radius)
 
         if explored:
@@ -147,12 +147,12 @@ class Renderer:
             interior_color = COLOURS["zinc_600"]
 
         # Draw main cave circle
-        tinted_interior = self.apply_depth_opacity(interior_color, coords)
+        tinted_interior = self.apply_depth_fade(interior_color, coords)
         pg.draw.circle(surf, tinted_interior, center, radius)
 
         if has_nearby_wumpus:
             wumpus_radius = radius * 2 / 3
-            tinted_orange = self.apply_depth_opacity(COLOURS["orange_500"], coords)
+            tinted_orange = self.apply_depth_fade(COLOURS["orange_500"], coords)
             pg.draw.circle(surf, tinted_orange, center, wumpus_radius)
 
         # Draw hazard icons inside caves containing hazards
