@@ -8,6 +8,7 @@ from wumpus.hazards import BottomlessPit, Superbats, Wumpus
 from wumpus.level import Level
 
 from graphical.colours import COLOURS
+from graphical.utils import apply_opacity
 
 
 class Renderer:
@@ -29,6 +30,9 @@ class Renderer:
 
         self.reset_rotor()
         self.reset_zoom()
+
+        # Load hazard icons
+        self.load_icons()
 
     def reset_zoom(self):
         """positions camera at (0, 0, 0, ..., -5)"""
@@ -60,7 +64,7 @@ class Renderer:
         direction parallel to your line of sight. Consider a 1D image
         line in a 3D space. A single axis is chosen for an image line,
         but the direction of sight has more than one option
-        (in 3D there are infinitely many vectors perependicuar to a vector).
+        (in 3D there are infinitely many vectors perependicular to a vector).
         Thus a perpendicuar direction (line of sight) must be chosen.
         """
         return (coord - self.camera_pos)[-1]
@@ -85,6 +89,95 @@ class Renderer:
         """Get the roated nD coordinates of a coordinate."""
         return self.vector_from_multivector(self.rotor >> self.algebra.vector(coord))
 
+    def apply_depth_opacity(self, color, coords: npt.NDArray) -> pg.Color:
+        """
+        Apply depth-based opacity to a color for 3D rendering effects.
+
+        Args:
+            color: Base color (RGB tuple or pygame Color)
+            coords: 3D coordinates where the last component is depth (z-axis)
+
+        Returns:
+            Color with depth-based transparency applied
+        """
+        depth_opacity = 1.0 - max(0, min(0.5, coords[-1]))
+        return apply_opacity(color, depth_opacity)
+
+    def load_icons(self):
+        """Load hazard icons from files."""
+        try:
+            self.pit_icon = pg.image.load("wumpus/graphical/icons/pit.png").convert_alpha()
+            self.bat_icon = pg.image.load("wumpus/graphical/icons/bat.png").convert_alpha()
+            self.wumpus_icon = pg.image.load("wumpus/graphical/icons/wumpus.png").convert_alpha()
+            self.wumpus_icon.fill(COLOURS["zinc_50"], special_flags=pg.BLEND_RGBA_MAX)
+        except FileNotFoundError:
+            # Fallback if icons don't exist yet
+            self.pit_icon = None
+            self.bat_icon = None
+            self.wumpus_icon = None
+
+    def draw_cave(self, surf: pg.surface.Surface, cave, coords: npt.NDArray, explored: bool = True):
+        """Draw a single cave with hazard indicators."""
+        center = pg.Vector2(self.project(coords, surf))
+        radius = 100 / self.perp_dist(coords)
+
+        nearby_hazards = self.level.get_nearby_hazards(cave)
+        has_nearby_pit = any(isinstance(hazard, BottomlessPit) for hazard in nearby_hazards)
+        has_nearby_bats = any(isinstance(hazard, Superbats) for hazard in nearby_hazards)
+        has_nearby_wumpus = any(isinstance(hazard, Wumpus) for hazard in nearby_hazards)
+
+        outline_layers = []
+
+        if has_nearby_pit:
+            outline_layers.append((COLOURS["green_500"], radius + 10))
+
+        if has_nearby_bats:
+            outline_layers.append((COLOURS["blue_500"], radius + 5))
+
+        if not has_nearby_pit and not has_nearby_bats:
+            outline_layers.append((COLOURS["zinc_600"], radius + 5))
+
+        for color, layer_radius in outline_layers:
+            tinted_color = self.apply_depth_opacity(color, coords)
+            pg.draw.circle(surf, tinted_color, center, layer_radius)
+
+        if explored:
+            interior_color = COLOURS["zinc_950"]
+        else:
+            interior_color = COLOURS["zinc_600"]
+
+        # Draw main cave circle
+        tinted_interior = self.apply_depth_opacity(interior_color, coords)
+        pg.draw.circle(surf, tinted_interior, center, radius)
+
+        if has_nearby_wumpus:
+            wumpus_radius = radius * 2 / 3
+            tinted_orange = self.apply_depth_opacity(COLOURS["orange_500"], coords)
+            pg.draw.circle(surf, tinted_orange, center, wumpus_radius)
+
+        # Draw hazard icons inside caves containing hazards
+        hazard_in_cave = self.level.get_hazard_in_cave(cave)
+        if hazard_in_cave is not None:
+            icon = None
+            if isinstance(hazard_in_cave, BottomlessPit) and self.pit_icon:
+                icon = self.pit_icon
+            elif isinstance(hazard_in_cave, Superbats) and self.bat_icon:
+                icon = self.bat_icon
+            elif isinstance(hazard_in_cave, Wumpus) and self.wumpus_icon:
+                icon = self.wumpus_icon
+
+            if icon:
+                icon_size = int(radius * 1.6)  # 80% of cave diameter
+                scaled_icon = pg.transform.scale(icon, (icon_size, icon_size))
+
+                # Apply depth-based opacity to icon
+                opacity = 255 - int(255 * max(0, min(0.5, coords[-1])))
+                icon_with_alpha = scaled_icon.copy()
+                icon_with_alpha.set_alpha(opacity)
+
+                icon_rect = icon_with_alpha.get_rect(center=center)
+                surf.blit(icon_with_alpha, icon_rect)
+
     def paint(self, surf: pg.surface.Surface):
         """Draws level to screen."""
         drawn = set()
@@ -107,28 +200,4 @@ class Renderer:
                 )
                 drawn.add((edge, cave.location))
 
-            colour = COLOURS["zinc_600"]
-            if any((isinstance(hazard, BottomlessPit) for hazard in self.level.get_nearby_hazards(cave))):
-                colour = COLOURS["green_500"]
-            if isinstance(self.level.get_hazard_in_cave(cave), BottomlessPit):
-                colour = COLOURS["green_900"]
-
-            if any((isinstance(hazard, Superbats) for hazard in self.level.get_nearby_hazards(cave))):
-                colour = COLOURS["blue_500"]
-            if isinstance(self.level.get_hazard_in_cave(cave), Superbats):
-                colour = COLOURS["blue_900"]
-
-            if any((isinstance(hazard, Wumpus) for hazard in self.level.get_nearby_hazards(cave))):
-                colour = COLOURS["orange_500"]
-            if isinstance(self.level.get_hazard_in_cave(cave), Wumpus):
-                colour = COLOURS["orange_900"]
-
-
-            pg.draw.circle(
-                surf,
-                pg.Color(colour).lerp(
-                    (0, 0, 0, 0), max(0, min(0.5, coords[-1]))
-                ),
-                pg.Vector2(self.project(coords, surf)),
-                100 / self.perp_dist(coords),
-            )
+            self.draw_cave(surf, cave, coords, explored=True)
