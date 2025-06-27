@@ -22,13 +22,24 @@ class Renderer:
         self.fov = fov
         self.dimension = len(list(self.level.level.values())[0].coords)
         self.algebra = Algebra(self.dimension)  # Clifford algebra
-        self.rotor = self.algebra.scalar(np.array([1]))
 
+        self.basis_vectors = list(
+            filter(lambda blade: blade[1].grades[0] == 1, list(self.algebra.blades.items()))
+        )  # get grade 1 blades
+
+        self.reset_rotor()
         self.reset_zoom()
 
     def reset_zoom(self):
         """positions camera at (0, 0, 0, ..., -5)"""
         self.camera_pos = np.array([0] * (self.dimension - 1) + [-5])
+
+    def reset_rotor(self):
+        self.rotor = self.algebra.scalar(np.array([1]))
+
+    def rotate(self, bivector: MultiVector, angle: float):
+        """Rotate on bivector by angle."""
+        self.rotor = ((bivector.grade(2).normalized() * angle/2).exp() * self.rotor).normalized()
 
     def zoom(self, value: float):
         """Moves camera on the 'z'-axis by `value`."""
@@ -56,11 +67,7 @@ class Renderer:
 
     def vector_from_multivector(self, mv: MultiVector):
         """Extracts a numpy array from the vector part of a multivector"""
-        basis_vectors = list(
-            filter(lambda blade: blade[1].grades[0] == 1, list(self.algebra.blades.items()))
-        )  # get grade 1 blades
-
-        return np.array([getattr(mv, basis[0]) for basis in basis_vectors])
+        return np.array([getattr(mv, basis[0]) for basis in self.basis_vectors])
 
     def project(self, coord: npt.NDArray, screen) -> pg.Vector2:
         """Projects an arbritrary dimension vector onto the image plane."""
@@ -79,11 +86,12 @@ class Renderer:
         return self.vector_from_multivector(self.rotor >> self.algebra.vector(coord))
 
     def paint(self, surf: pg.surface.Surface):
+        """Draws level to screen."""
         drawn = set()
 
         for cave in sorted(
             (caves := self.level.level).values(),
-            key=lambda cave: self.perp_dist(np.array(cave.coords)),
+            key=lambda cave: self.perp_dist(self.rotated(np.array(cave.coords))),
             reverse=True,
         ):
             coords = self.rotated(np.array(cave.coords))

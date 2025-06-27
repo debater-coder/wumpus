@@ -42,6 +42,14 @@ class Playing(Scene):
         for event in pg.event.get(eventtype=pg.MOUSEWHEEL):
             self.renderer.zoom(event.precise_y)
 
+
+        for event in pg.event.get(eventtype=pg.MOUSEMOTION):
+            if pg.mouse.get_pressed()[0]:
+                if abs(event.rel[0]) > 0:
+                    self.renderer.rotate(self.renderer.basis_vectors[2][1] ^ self.renderer.basis_vectors[0][1], event.rel[0] / 1000)
+                if abs(event.rel[1]) > 0:
+                    self.renderer.rotate(self.renderer.basis_vectors[2][1] ^ self.renderer.basis_vectors[1][1], event.rel[1] / 1000)
+
     def paint(self):
         self.screen.blit(self.background, (0, 0))
         self.screen.blit(
