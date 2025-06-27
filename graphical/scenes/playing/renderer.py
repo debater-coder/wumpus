@@ -2,9 +2,9 @@ from kingdon import Algebra, MultiVector
 import numpy as np
 import numpy.typing as npt
 import pygame as pg
-import typing
 import math
 
+from wumpus.hazards import BottomlessPit, Superbats, Wumpus
 from wumpus.level import Level
 
 from graphical.colours import COLOURS
@@ -107,9 +107,26 @@ class Renderer:
                 )
                 drawn.add((edge, cave.location))
 
+            colour = COLOURS["zinc_600"]
+            if any((isinstance(hazard, BottomlessPit) for hazard in self.level.get_nearby_hazards(cave))):
+                colour = COLOURS["green_500"]
+            if isinstance(self.level.get_hazard_in_cave(cave), BottomlessPit):
+                colour = COLOURS["green_900"]
+
+            if any((isinstance(hazard, Superbats) for hazard in self.level.get_nearby_hazards(cave))):
+                colour = COLOURS["blue_500"]
+            if isinstance(self.level.get_hazard_in_cave(cave), Superbats):
+                colour = COLOURS["blue_900"]
+
+            if any((isinstance(hazard, Wumpus) for hazard in self.level.get_nearby_hazards(cave))):
+                colour = COLOURS["orange_500"]
+            if isinstance(self.level.get_hazard_in_cave(cave), Wumpus):
+                colour = COLOURS["orange_900"]
+
+
             pg.draw.circle(
                 surf,
-                pg.Color(COLOURS["amber_900"]).lerp(
+                pg.Color(colour).lerp(
                     (0, 0, 0, 0), max(0, min(0.5, coords[-1]))
                 ),
                 pg.Vector2(self.project(coords, surf)),

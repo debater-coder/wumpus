@@ -160,5 +160,14 @@ class Level:
             )
         )
 
+    def get_nearby_hazards(self, cave: Cave):
+        hazards: list[Hazard] = []
+
+        for location in cave.tunnels:
+            cave = self.get_cave(location)
+            if hazard := self.get_hazard_in_cave(cave):
+                hazards.append(hazard)
+        return hazards
+
     def get_cave(self, location: int) -> Cave:
         return self.level[location]

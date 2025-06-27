@@ -8,6 +8,7 @@ from .events import (
     ArrowHit,
 )
 from .level import Level
+from .hazards import Hazard
 
 from collections.abc import Iterator
 from typing import assert_never
@@ -67,14 +68,7 @@ class PlayerController:
         pass
 
     def get_nearby_msgs(self):
-        messages: list[str] = []
-
-        for location in self.cave.tunnels:
-            cave = self.level.get_cave(location)
-            if hazard := self.level.get_hazard_in_cave(cave):
-                messages.append(hazard.nearby_msg())
-
-        return messages
+        return [hazard.nearby_msg() for hazard in self.level.get_nearby_hazards(self.cave)]
 
     def respawn(self):
         self.cave = self.initial_cave
