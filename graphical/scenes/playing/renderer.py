@@ -92,11 +92,11 @@ class Renderer:
     def apply_depth_fade(self, color, coords: npt.NDArray) -> pg.Color:
         """
         Apply depth-based darkening to a color for 3D rendering effects.
-        
+
         Args:
             color: Base color (RGB tuple or pygame Color)
             coords: 3D coordinates where the last component is depth (z-axis)
-            
+
         Returns:
             Color darkened based on depth
         """
@@ -105,19 +105,24 @@ class Renderer:
 
     def load_icons(self):
         """Load hazard icons from files."""
-        try:
-            self.pit_icon = pg.image.load("wumpus/graphical/icons/pit.png").convert_alpha()
-            self.bat_icon = pg.image.load("wumpus/graphical/icons/bat.png").convert_alpha()
-            self.wumpus_icon = pg.image.load("wumpus/graphical/icons/wumpus.png").convert_alpha()
-            self.wumpus_icon.fill(COLOURS["zinc_50"], special_flags=pg.BLEND_RGBA_MAX)
-        except FileNotFoundError:
-            # Fallback if icons don't exist yet
-            self.pit_icon = None
-            self.bat_icon = None
-            self.wumpus_icon = None
+        self.pit_icon = None
+        self.bat_icon = None
+
+        original_wumpus = pg.image.load("graphical/icons/wumpus.png").convert_alpha()
+        # Create white version by creating a white surface and using the original as a mask
+        self.wumpus_icon = pg.Surface(original_wumpus.get_size(), pg.SRCALPHA)
+        # Use the original image's alpha channel to cut out the shape
+        mask = pg.mask.from_surface(original_wumpus)
+        mask_surface = mask.to_surface(setcolor=COLOURS["red_400"], unsetcolor=(0, 0, 0, 0))
+        self.wumpus_icon = mask_surface
+        print(self.wumpus_icon)
 
     def draw_cave(self, surf: pg.surface.Surface, cave, coords: npt.NDArray, explored: bool = True):
         """Draw a single cave with hazard indicators."""
+        # Skip caves that are behind the camera
+        if self.perp_dist(coords) <= 0:
+            return
+
         center = pg.Vector2(self.project(coords, surf))
         radius = 100 / self.perp_dist(coords)
 
@@ -167,7 +172,7 @@ class Renderer:
                 icon = self.wumpus_icon
 
             if icon:
-                icon_size = int(radius * 1.6)  # 80% of cave diameter
+                icon_size = int(radius)  # 80% of cave diameter
                 scaled_icon = pg.transform.scale(icon, (icon_size, icon_size))
 
                 # Apply depth-based opacity to icon

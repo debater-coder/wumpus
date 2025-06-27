@@ -1,1 +1,1 @@
-Icons: Font Awesome
+Wumpus icon -- Hunt the Wumpus box art
