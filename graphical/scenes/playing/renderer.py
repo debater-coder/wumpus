@@ -8,7 +8,8 @@ from wumpus.hazards import BottomlessPit, Superbats, Wumpus
 from wumpus.level import Level
 
 from graphical.colours import COLOURS
-from graphical.utils import apply_fade
+from graphical.utils import apply_fade, load_and_recolor_icon
+import graphical.icons
 
 
 class Renderer:
@@ -105,17 +106,9 @@ class Renderer:
 
     def load_icons(self):
         """Load hazard icons from files."""
-        self.pit_icon = None
-        self.bat_icon = None
-
-        original_wumpus = pg.image.load("graphical/icons/wumpus.png").convert_alpha()
-        # Create white version by creating a white surface and using the original as a mask
-        self.wumpus_icon = pg.Surface(original_wumpus.get_size(), pg.SRCALPHA)
-        # Use the original image's alpha channel to cut out the shape
-        mask = pg.mask.from_surface(original_wumpus)
-        mask_surface = mask.to_surface(setcolor=COLOURS["red_400"], unsetcolor=(0, 0, 0, 0))
-        self.wumpus_icon = mask_surface
-        print(self.wumpus_icon)
+        self.pit_icon = load_and_recolor_icon(graphical.icons, "pit.png", COLOURS["green_400"])
+        self.bat_icon = load_and_recolor_icon(graphical.icons, "bat.png", COLOURS["blue_400"])
+        self.wumpus_icon = load_and_recolor_icon(graphical.icons, "wumpus.png", COLOURS["red_400"])
 
     def draw_cave(self, surf: pg.surface.Surface, cave, coords: npt.NDArray, explored: bool = True):
         """Draw a single cave with hazard indicators."""
@@ -126,6 +119,7 @@ class Renderer:
         center = pg.Vector2(self.project(coords, surf))
         radius = 100 / self.perp_dist(coords)
 
+        hazard_in_cave = self.level.get_hazard_in_cave(cave)
         nearby_hazards = self.level.get_nearby_hazards(cave)
         has_nearby_pit = any(isinstance(hazard, BottomlessPit) for hazard in nearby_hazards)
         has_nearby_bats = any(isinstance(hazard, Superbats) for hazard in nearby_hazards)
@@ -133,15 +127,17 @@ class Renderer:
 
         outline_layers = []
 
-        if has_nearby_pit:
-            outline_layers.append((COLOURS["green_500"], radius + 10))
+        if not hazard_in_cave:
+            if has_nearby_pit:
+                outline_layers.append((COLOURS["green_500"], radius + 10))
 
-        if has_nearby_bats:
-            outline_layers.append((COLOURS["blue_500"], radius + 5))
+            if has_nearby_bats:
+                outline_layers.append((COLOURS["blue_500"], radius + 5))
 
-        if not has_nearby_pit and not has_nearby_bats:
+        if not outline_layers:
             outline_layers.append((COLOURS["zinc_600"], radius + 5))
 
+        # Proximity border
         for color, layer_radius in outline_layers:
             tinted_color = self.apply_depth_fade(color, coords)
             pg.draw.circle(surf, tinted_color, center, layer_radius)
@@ -155,13 +151,13 @@ class Renderer:
         tinted_interior = self.apply_depth_fade(interior_color, coords)
         pg.draw.circle(surf, tinted_interior, center, radius)
 
-        if has_nearby_wumpus:
+        # Wumpus indicator
+        if has_nearby_wumpus and not hazard_in_cave:
             wumpus_radius = radius * 2 / 3
             tinted_orange = self.apply_depth_fade(COLOURS["orange_500"], coords)
             pg.draw.circle(surf, tinted_orange, center, wumpus_radius)
 
         # Draw hazard icons inside caves containing hazards
-        hazard_in_cave = self.level.get_hazard_in_cave(cave)
         if hazard_in_cave is not None:
             icon = None
             if isinstance(hazard_in_cave, BottomlessPit) and self.pit_icon:
