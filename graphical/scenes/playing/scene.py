@@ -1,10 +1,8 @@
 from collections.abc import Iterator
 import pygame as pg
-import numpy as np
-import math
 import importlib.resources
 
-from wumpus import Level
+from wumpus import Level, PlayerController
 import wumpus.levels
 
 from graphical.scene import PushScene, Scene, SceneEvent
@@ -30,6 +28,7 @@ class Playing(Scene):
             wumpus.levels, f"{level_index:02}.json"
         )
         self.level = Level(self.map)
+        self.player = PlayerController(self.level)
 
         self.renderer = Renderer(self.level, fov=90)
 
@@ -42,13 +41,20 @@ class Playing(Scene):
         for event in pg.event.get(eventtype=pg.MOUSEWHEEL):
             self.renderer.zoom(event.precise_y)
 
-
         for event in pg.event.get(eventtype=pg.MOUSEMOTION):
             if pg.mouse.get_pressed()[0]:
                 if abs(event.rel[0]) > 0:
-                    self.renderer.rotate(self.renderer.basis_vectors[2][1] ^ self.renderer.basis_vectors[0][1], event.rel[0] / 1000)
+                    self.renderer.rotate(
+                        self.renderer.basis_vectors[2][1]
+                        ^ self.renderer.basis_vectors[0][1],
+                        event.rel[0] / 1000,
+                    )
                 if abs(event.rel[1]) > 0:
-                    self.renderer.rotate(self.renderer.basis_vectors[2][1] ^ self.renderer.basis_vectors[1][1], event.rel[1] / 1000)
+                    self.renderer.rotate(
+                        self.renderer.basis_vectors[2][1]
+                        ^ self.renderer.basis_vectors[1][1],
+                        event.rel[1] / 1000,
+                    )
 
     def paint(self):
         self.screen.blit(self.background, (0, 0))
@@ -56,7 +62,7 @@ class Playing(Scene):
             self.text, self.text.get_rect(center=self.screen.get_rect().center)
         )
 
-        self.renderer.paint(self.screen)
+        self.renderer.paint(self.screen, self.player.cave.location)
 
         pg.display.flip()
 

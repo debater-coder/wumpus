@@ -17,7 +17,8 @@ class Renderer:
     Renders a level of abitrary dimension to 2D.
     Yields events for player interactions.
     The image plane is parallel to the first two basis vectors (eg: xy)
-    with its last coordinate (eg: z) changing to zoom."""
+    with its third (eg: z) changing to zoom.
+    """
 
     def __init__(self, level: Level, fov: float = 90):
         self.level = level
@@ -26,36 +27,38 @@ class Renderer:
         self.algebra = Algebra(self.dimension)  # Clifford algebra
 
         self.basis_vectors = list(
-            filter(lambda blade: blade[1].grades[0] == 1, list(self.algebra.blades.items()))
+            filter(
+                lambda blade: blade[1].grades[0] == 1, list(self.algebra.blades.items())
+            )
         )  # get grade 1 blades
 
         self.reset_rotor()
         self.reset_zoom()
 
-        # Load hazard icons
         self.load_icons()
 
     def reset_zoom(self):
-        """positions camera at (0, 0, 0, ..., -5)"""
-        self.camera_pos = np.array([0] * (self.dimension - 1) + [-5])
+        """positions camera at (0, 0, -5, 0, 0, ...)"""
+        self.camera_pos = np.array([0, 0, -5] + [0] * (self.dimension - 3))
 
     def reset_rotor(self):
         self.rotor = self.algebra.scalar(np.array([1]))
 
     def rotate(self, bivector: MultiVector, angle: float):
         """Rotate on bivector by angle."""
-        self.rotor = ((bivector.grade(2).normalized() * angle/2).exp() * self.rotor).normalized()
+        self.rotor = (
+            (bivector.grade(2).normalized() * angle / 2).exp() * self.rotor
+        ).normalized()
 
     def zoom(self, value: float):
         """Moves camera on the 'z'-axis by `value`."""
-        self.camera_pos[-1] += value
+        self.camera_pos[2] += value
 
     def perp_dist(self, coord: npt.NDArray) -> float:
         """
         Get the perpendicular distance between the image plane and object.
         In 4D and above there are more than one directions perpendicuar to any
-        2D plane. We define our camera orientation to look down the 'z'-axis
-        (the last coordinate).
+        2D plane. We define our camera orientation to look down the third-axis
 
         Used for foreshortening.
 
@@ -68,7 +71,7 @@ class Renderer:
         (in 3D there are infinitely many vectors perependicular to a vector).
         Thus a perpendicuar direction (line of sight) must be chosen.
         """
-        return (coord - self.camera_pos)[-1]
+        return (coord - self.camera_pos)[2]
 
     def vector_from_multivector(self, mv: MultiVector):
         """Extracts a numpy array from the vector part of a multivector"""
@@ -101,16 +104,31 @@ class Renderer:
         Returns:
             Color darkened based on depth
         """
-        depth_fade = max(0, min(0.5, coords[-1]))
+        depth_fade = max(0, min(0.5, coords[2]))
         return apply_fade(color, 1.0 - depth_fade)
 
     def load_icons(self):
-        """Load hazard icons from files."""
-        self.pit_icon = load_and_recolor_icon(graphical.icons, "pit.png", COLOURS["green_400"])
-        self.bat_icon = load_and_recolor_icon(graphical.icons, "bat.png", COLOURS["blue_400"])
-        self.wumpus_icon = load_and_recolor_icon(graphical.icons, "wumpus.png", COLOURS["red_400"])
+        self.pit_icon = load_and_recolor_icon(
+            graphical.icons, "pit.png", COLOURS["green_400"]
+        )
+        self.bat_icon = load_and_recolor_icon(
+            graphical.icons, "bat.png", COLOURS["blue_400"]
+        )
+        self.wumpus_icon = load_and_recolor_icon(
+            graphical.icons, "wumpus.png", COLOURS["red_400"]
+        )
+        self.player_icon = load_and_recolor_icon(
+            graphical.icons, "player.png", COLOURS["yellow_400"]
+        )
 
-    def draw_cave(self, surf: pg.surface.Surface, cave, coords: npt.NDArray, explored: bool = True):
+    def draw_cave(
+        self,
+        surf: pg.surface.Surface,
+        cave,
+        coords: npt.NDArray,
+        player: bool,
+        explored: bool = True,
+    ):
         """Draw a single cave with hazard indicators."""
         # Skip caves that are behind the camera
         if self.perp_dist(coords) <= 0:
@@ -121,8 +139,12 @@ class Renderer:
 
         hazard_in_cave = self.level.get_hazard_in_cave(cave)
         nearby_hazards = self.level.get_nearby_hazards(cave)
-        has_nearby_pit = any(isinstance(hazard, BottomlessPit) for hazard in nearby_hazards)
-        has_nearby_bats = any(isinstance(hazard, Superbats) for hazard in nearby_hazards)
+        has_nearby_pit = any(
+            isinstance(hazard, BottomlessPit) for hazard in nearby_hazards
+        )
+        has_nearby_bats = any(
+            isinstance(hazard, Superbats) for hazard in nearby_hazards
+        )
         has_nearby_wumpus = any(isinstance(hazard, Wumpus) for hazard in nearby_hazards)
 
         outline_layers = []
@@ -157,29 +179,52 @@ class Renderer:
             tinted_orange = self.apply_depth_fade(COLOURS["orange_500"], coords)
             pg.draw.circle(surf, tinted_orange, center, wumpus_radius)
 
-        # Draw hazard icons inside caves containing hazards
-        if hazard_in_cave is not None:
-            icon = None
-            if isinstance(hazard_in_cave, BottomlessPit) and self.pit_icon:
-                icon = self.pit_icon
-            elif isinstance(hazard_in_cave, Superbats) and self.bat_icon:
-                icon = self.bat_icon
-            elif isinstance(hazard_in_cave, Wumpus) and self.wumpus_icon:
-                icon = self.wumpus_icon
+        hazard_icon = None
+        match hazard_in_cave:
+            case BottomlessPit():
+                hazard_icon = self.pit_icon
+            case Superbats():
+                hazard_icon = self.bat_icon
+            case Wumpus():
+                hazard_icon = self.wumpus_icon
 
-            if icon:
-                icon_size = int(radius)  # 80% of cave diameter
-                scaled_icon = pg.transform.scale(icon, (icon_size, icon_size))
+        if hazard_icon:
+            self.draw_icon(
+                surf,
+                hazard_icon,
+                int(radius),
+                int(255 - 255 * max(0, min(0.5, coords[2]))),
+                center,
+            )
 
-                # Apply depth-based opacity to icon
-                opacity = 255 - int(255 * max(0, min(0.5, coords[-1])))
-                icon_with_alpha = scaled_icon.copy()
-                icon_with_alpha.set_alpha(opacity)
+        if player:
+            self.draw_icon(
+                surf,
+                self.player_icon,
+                int(radius * 1.6),
+                int(255 - 255 * max(0, min(0.5, coords[2]))),
+                center,
+            )
 
-                icon_rect = icon_with_alpha.get_rect(center=center)
-                surf.blit(icon_with_alpha, icon_rect)
+    def draw_icon(
+        self,
+        surf: pg.surface.Surface,
+        icon: pg.surface.Surface | None,
+        size: int,
+        opacity: int,
+        center: pg.Vector2,
+    ):
+        if not icon:
+            return
+        scaled_icon = pg.transform.scale(icon, (size, size))
 
-    def paint(self, surf: pg.surface.Surface):
+        icon_with_alpha = scaled_icon.copy()
+        icon_with_alpha.set_alpha(opacity)
+
+        icon_rect = icon_with_alpha.get_rect(center=center)
+        surf.blit(icon_with_alpha, icon_rect)
+
+    def paint(self, surf: pg.surface.Surface, location: int | None):
         """Draws level to screen."""
         drawn = set()
 
@@ -201,4 +246,4 @@ class Renderer:
                 )
                 drawn.add((edge, cave.location))
 
-            self.draw_cave(surf, cave, coords, explored=True)
+            self.draw_cave(surf, cave, coords, location == cave.location, explored=True)

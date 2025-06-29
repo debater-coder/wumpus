@@ -68,7 +68,9 @@ class PlayerController:
         pass
 
     def get_nearby_msgs(self):
-        return [hazard.nearby_msg() for hazard in self.level.get_nearby_hazards(self.cave)]
+        return [
+            hazard.nearby_msg() for hazard in self.level.get_nearby_hazards(self.cave)
+        ]
 
     def respawn(self):
         self.cave = self.initial_cave

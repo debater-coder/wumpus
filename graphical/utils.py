@@ -14,22 +14,22 @@ def button_up():
 
 def apply_fade(color, fade_factor: float) -> pg.Color:
     """
-    Apply fading effect by lerping to black (since pg.draw doesn't support alpha).
-    
+    Apply fading effect by lerping to black
+
     Args:
         color: Base color (RGB tuple or pygame Color)
         fade_factor: Fade value from 0.0 (black) to 1.0 (original color)
-        
+
     Returns:
         Color lerped towards black based on fade factor
-        
+
     Examples:
         # Make a color 50% faded
         semi_faded = apply_fade((255, 0, 0), 0.5)  # Red faded to darker red
-        
+
         # Keep original color
         bright = apply_fade((0, 255, 0), 1.0)  # Green unchanged
-        
+
         # Make a color very dark
         dark = apply_fade((0, 0, 255), 0.1)  # Blue nearly black
     """
@@ -39,17 +39,18 @@ def apply_fade(color, fade_factor: float) -> pg.Color:
 def load_icon(package, filename: str) -> Optional[pg.Surface]:
     """
     Load an icon from a package using importlib.resources.
-    
+
     Args:
         package: Package containing the icon (e.g., graphical.icons)
         filename: Icon filename (e.g., "wumpus.png")
-        
+
     Returns:
         Loaded pygame Surface with alpha, or None if loading fails
     """
     try:
         icon_data = importlib.resources.read_binary(package, filename)
         import io
+
         icon_file = io.BytesIO(icon_data)
         return pg.image.load(icon_file).convert_alpha()
     except (FileNotFoundError, ModuleNotFoundError, AttributeError):
@@ -59,11 +60,11 @@ def load_icon(package, filename: str) -> Optional[pg.Surface]:
 def recolor_icon(surface: pg.Surface, color) -> pg.Surface:
     """
     Recolor an icon to a specific color while preserving its shape.
-    
+
     Args:
         surface: Original pygame Surface with alpha channel
         color: Target color (RGB tuple or pygame Color)
-        
+
     Returns:
         New surface with the shape recolored to the specified color
     """
@@ -76,19 +77,19 @@ def recolor_icon(surface: pg.Surface, color) -> pg.Surface:
 def load_and_recolor_icon(package, filename: str, color) -> Optional[pg.Surface]:
     """
     Load an icon and recolor it in one step.
-    
+
     Args:
         package: Package containing the icon (e.g., graphical.icons)
         filename: Icon filename (e.g., "wumpus.png")
         color: Target color (RGB tuple or pygame Color)
-        
+
     Returns:
         Loaded and recolored pygame Surface, or None if loading fails
-        
+
     Examples:
         # Load and make wumpus red
         wumpus = load_and_recolor_icon(graphical.icons, "wumpus.png", COLOURS["red_400"])
-        
+
         # Load and make bat blue
         bat = load_and_recolor_icon(graphical.icons, "bat.png", COLOURS["blue_400"])
     """
@@ -96,6 +97,3 @@ def load_and_recolor_icon(package, filename: str, color) -> Optional[pg.Surface]
     if original:
         return recolor_icon(original, color)
     return None
-
-
-

@@ -17,7 +17,7 @@ class TestWumpus(unittest.TestCase):
 
         for _ in range(iterations):
             wumpus = hazards.Wumpus(
-                {0: cave.Cave(0, [1, 2, 3], coords=()) }
+                {0: cave.Cave(0, [1, 2, 3], coords=())}
             )  # Wumpus spawns in cave 0
             wumpus.location = 0
             print(wumpus.location)

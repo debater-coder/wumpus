@@ -21,9 +21,7 @@ class TestPlayerController(unittest.TestCase):
         self.player = PlayerController(self.level)
 
     def test_spawn(self):
-        self.assertListEqual(
-            self.player.get_nearby_msgs(), ["I feel a draft."]
-        )
+        self.assertListEqual(self.player.get_nearby_msgs(), ["I feel a draft."])
         self.assertIsInstance(self.player.cave, Cave)
         self.assertEqual(self.player.cave.location, 17)
         self.assertListEqual(self.player.cave.tunnels, [3, 7, 11])
