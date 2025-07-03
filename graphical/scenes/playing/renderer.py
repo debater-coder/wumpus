@@ -4,12 +4,15 @@ import numpy.typing as npt
 import pygame as pg
 import math
 
-from wumpus.hazards import BottomlessPit, Superbats, Wumpus
 from wumpus.level import Level
 
 from graphical.colours import COLOURS
 from graphical.utils import apply_fade, load_and_recolor_icon
 import graphical.icons
+
+from .drawable import RenderContext
+from .cave import DrawableCave, DrawablePlayer
+from .drawable import Drawable
 
 
 class Renderer:
@@ -95,11 +98,11 @@ class Renderer:
 
     def apply_depth_fade(self, color, coords: npt.NDArray) -> pg.Color:
         """
-        Apply depth-based darkening to a color for 3D rendering effects.
+        Apply depth-based darkening to a color for arbitrary-dimensional rendering.
 
         Args:
             color: Base color (RGB tuple or pygame Color)
-            coords: 3D coordinates where the last component is depth (z-axis)
+            coords: N-dimensional coordinates where the third component is depth along line of sight
 
         Returns:
             Color darkened based on depth
@@ -121,90 +124,22 @@ class Renderer:
             graphical.icons, "player.png", COLOURS["yellow_400"]
         )
 
-    def draw_cave(
-        self,
-        surf: pg.surface.Surface,
-        cave,
-        coords: npt.NDArray,
-        player: bool,
-        explored: bool = True,
-    ):
-        """Draw a single cave with hazard indicators."""
-        # Skip caves that are behind the camera
-        if self.perp_dist(coords) <= 0:
-            return
-
-        center = pg.Vector2(self.project(coords, surf))
-        radius = 100 / self.perp_dist(coords)
-
-        hazard_in_cave = self.level.get_hazard_in_cave(cave)
-        nearby_hazards = self.level.get_nearby_hazards(cave)
-        has_nearby_pit = any(
-            isinstance(hazard, BottomlessPit) for hazard in nearby_hazards
-        )
-        has_nearby_bats = any(
-            isinstance(hazard, Superbats) for hazard in nearby_hazards
-        )
-        has_nearby_wumpus = any(isinstance(hazard, Wumpus) for hazard in nearby_hazards)
-
-        outline_layers = []
-
-        if not hazard_in_cave:
-            if has_nearby_pit:
-                outline_layers.append((COLOURS["green_500"], radius + 10))
-
-            if has_nearby_bats:
-                outline_layers.append((COLOURS["blue_500"], radius + 5))
-
-        if not outline_layers:
-            outline_layers.append((COLOURS["zinc_600"], radius + 5))
-
-        # Proximity border
-        for color, layer_radius in outline_layers:
-            tinted_color = self.apply_depth_fade(color, coords)
-            pg.draw.circle(surf, tinted_color, center, layer_radius)
-
-        if explored:
-            interior_color = COLOURS["zinc_950"]
-        else:
-            interior_color = COLOURS["zinc_600"]
-
-        # Draw main cave circle
-        tinted_interior = self.apply_depth_fade(interior_color, coords)
-        pg.draw.circle(surf, tinted_interior, center, radius)
-
-        # Wumpus indicator
-        if has_nearby_wumpus and not hazard_in_cave:
-            wumpus_radius = radius * 2 / 3
-            tinted_orange = self.apply_depth_fade(COLOURS["orange_500"], coords)
-            pg.draw.circle(surf, tinted_orange, center, wumpus_radius)
-
-        hazard_icon = None
-        match hazard_in_cave:
-            case BottomlessPit():
-                hazard_icon = self.pit_icon
-            case Superbats():
-                hazard_icon = self.bat_icon
-            case Wumpus():
-                hazard_icon = self.wumpus_icon
-
-        if hazard_icon:
-            self.draw_icon(
-                surf,
-                hazard_icon,
-                int(radius),
-                int(255 - 255 * max(0, min(0.5, coords[2]))),
-                center,
-            )
-
-        if player:
-            self.draw_icon(
-                surf,
-                self.player_icon,
-                int(radius * 1.6),
-                int(255 - 255 * max(0, min(0.5, coords[2]))),
-                center,
-            )
+    def create_drawables(self, player_location: int | None) -> list[Drawable]:
+        """Create all drawable objects for the level."""
+        drawables = []
+        
+        # Create cave drawables
+        for cave in self.level.level.values():
+            drawable_cave = DrawableCave(cave=cave, explored=True)
+            drawables.append(drawable_cave)
+        
+        # Create player drawable if location is provided
+        if player_location is not None:
+            player_cave = self.level.get_cave(player_location)
+            drawable_player = DrawablePlayer(cave=player_cave)
+            drawables.append(drawable_player)
+            
+        return drawables
 
     def draw_icon(
         self,
@@ -226,14 +161,39 @@ class Renderer:
 
     def paint(self, surf: pg.surface.Surface, location: int | None):
         """Draws level to screen."""
+        # Create render context
+        context = RenderContext(self, self.level)
+        
+        # Create all drawable objects
+        drawables = self.create_drawables(location)
+        
+        # Sort by depth (farthest first) so closer objects render on top
+        # Objects with larger perpendicular distance along the third basis are farther away
+        # Reverse=True means farthest objects are drawn first (painter's algorithm)
+        drawables.sort(
+            key=lambda drawable: self.perp_dist(self.rotated(drawable.get_coords())),
+            reverse=True
+        )
+        
+        # Debug depth sorting (uncomment for debugging)
+        # self._debug_depth_order(drawables, location)
+        
+        # Draw tunnels first (behind everything)
+        self._draw_tunnels(surf)
+        
+        # Draw all objects in depth order along the line of sight - player will be correctly 
+        # depth-sorted with caves instead of always appearing on top
+        for drawable in drawables:
+            drawable.paint(surf, context)
+    
+    def _draw_tunnels(self, surf: pg.surface.Surface):
+        """Draw all tunnel connections between caves."""
         drawn = set()
-
-        for cave in sorted(
-            (caves := self.level.level).values(),
-            key=lambda cave: self.perp_dist(self.rotated(np.array(cave.coords))),
-            reverse=True,
-        ):
+        caves = self.level.level
+        
+        for cave in caves.values():
             coords = self.rotated(np.array(cave.coords))
+            
             for edge in cave.tunnels:
                 edge_coords = self.rotated(np.array(caves[edge].coords))
                 if (cave.location, edge) in drawn:
@@ -245,5 +205,20 @@ class Renderer:
                     pg.Vector2(self.project(coords, surf)),
                 )
                 drawn.add((edge, cave.location))
+    
+    def _debug_depth_order(self, drawables: list[Drawable], player_location: int | None):
+        """Debug method to print depth order of drawable objects along the line of sight."""
+        print(f"\nDepth order for {len(drawables)} drawables:")
+        for i, drawable in enumerate(drawables):
+            coords = self.rotated(drawable.get_coords())
+            depth = self.perp_dist(coords)
+            drawable_type = type(drawable).__name__
+            
+            # Check if this is the player
+            is_player = (isinstance(drawable, DrawablePlayer) and 
+                        player_location is not None and
+                        drawable.cave.location == player_location)
+            
+            marker = " <-- PLAYER" if is_player else ""
+            print(f"  {i}: {drawable_type} at depth {depth:.2f}{marker}")
 
-            self.draw_cave(surf, cave, coords, location == cave.location, explored=True)

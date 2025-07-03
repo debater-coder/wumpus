@@ -23,7 +23,7 @@ class "Button" as graphical.gui.button.Button {
   update(up: bool)
 }
 class "Cave" as wumpus.cave.Cave {
-  coords : tuple[float, float]
+  coords : tuple[float, ...]
   location : int
   tunnels : list[int]
 }
@@ -41,6 +41,12 @@ class "Hazard" as wumpus.hazards.Hazard {
   on_arrow_miss() -> Iterator[Event]
   on_player_enter() -> Iterator[Event]
 }
+class "HowToPlay" as graphical.scenes.how_to_play.HowToPlay {
+  back
+  background
+  screen
+  handle_pg_events()
+}
 class "Level" as wumpus.level.Level {
   debug : bool
   hazards : dict[int, Hazard]
@@ -49,8 +55,37 @@ class "Level" as wumpus.level.Level {
   choose_empty_cave() -> Cave
   get_cave(location: int) -> Cave
   get_hazard_in_cave(cave: Cave) -> Hazard | None
+  get_nearby_hazards(cave: Cave)
   get_wumpus_location() -> int
   handle_event(event: Event) -> Iterator[PlayerKilled | PlayerWon | PlayerMoved | ArrowHit | str]
+}
+class "LevelSelect" as graphical.scenes.level_select.LevelSelect {
+  back
+  background
+  buttons
+  screen
+  stack
+  handle_pg_events()
+  paint()
+  update() -> Iterator[SceneEvent]
+}
+class "MainMenu" as graphical.scenes.menu.MainMenu {
+  background
+  buttons : list
+  screen
+  stack
+  handle_pg_events()
+  paint()
+  update() -> Iterator[SceneEvent]
+}
+class "Paused" as graphical.scenes.paused.Paused {
+  background
+  buttons : list
+  screen
+  stack
+  handle_pg_events() -> Iterator[SceneEvent]
+  paint()
+  update() -> Iterator[SceneEvent]
 }
 class "PlayerController" as wumpus.player.PlayerController {
   alive : bool
@@ -71,10 +106,49 @@ class "PlayerMoved" as wumpus.events.PlayerMoved {
 }
 class "PlayerWon" as wumpus.events.PlayerWon {
 }
+class "Playing" as graphical.scenes.playing.scene.Playing {
+  background
+  level
+  level_index : int
+  map
+  player
+  renderer
+  screen
+  text
+  handle_pg_events()
+  paint()
+  update() -> Iterator[SceneEvent]
+}
 class "PopScene" as graphical.scene.PopScene {
 }
 class "PushScene" as graphical.scene.PushScene {
   scene
+}
+class "Renderer" as graphical.scenes.playing.renderer.Renderer {
+  algebra
+  basis_vectors : list
+  bat_icon : NoneType
+  camera_pos : ndarray
+  dimension
+  fov : float
+  level
+  pit_icon : NoneType
+  player_icon : NoneType
+  rotor
+  wumpus_icon : NoneType
+  apply_depth_fade(color, coords: npt.NDArray) -> pg.Color
+  draw_cave(surf: pg.surface.Surface, cave, coords: npt.NDArray, player: bool, explored: bool)
+  draw_icon(surf: pg.surface.Surface, icon: pg.surface.Surface | None, size: int, opacity: int, center: pg.Vector2)
+  load_icons()
+  paint(surf: pg.surface.Surface, location: int | None)
+  perp_dist(coord: npt.NDArray) -> float
+  project(coord: npt.NDArray, screen) -> pg.Vector2
+  reset_rotor()
+  reset_zoom()
+  rotate(bivector: MultiVector, angle: float)
+  rotated(coord: npt.NDArray) -> npt.NDArray
+  vector_from_multivector(mv: MultiVector)
+  zoom(value: float)
 }
 class "Scene" as graphical.scene.Scene {
   {abstract}enter()
@@ -131,15 +205,29 @@ class "Wumpus" as wumpus.hazards.Wumpus {
 class "WumpusMoved" as wumpus.events.WumpusMoved {
 }
 graphical.gui.button.Button --|> graphical.gui.element.Element
+graphical.scenes.how_to_play.HowToPlay --|> graphical.scene.Scene
+graphical.scenes.level_select.LevelSelect --|> graphical.scene.Scene
+graphical.scenes.menu.MainMenu --|> graphical.scene.Scene
+graphical.scenes.paused.Paused --|> graphical.scene.Scene
+graphical.scenes.playing.scene.Playing --|> graphical.scene.Scene
 wumpus.events.ArrowShot --|> wumpus.events.EntityMoved
 wumpus.events.PlayerMoved --|> wumpus.events.EntityMoved
 wumpus.events.WumpusMoved --|> wumpus.events.EntityMoved
 wumpus.hazards.BottomlessPit --|> wumpus.hazards.Hazard
 wumpus.hazards.Superbats --|> wumpus.hazards.Hazard
 wumpus.hazards.Wumpus --|> wumpus.hazards.Hazard
+graphical.gui.button.Button --* graphical.scenes.how_to_play.HowToPlay : back
+graphical.gui.button.Button --* graphical.scenes.level_select.LevelSelect : back
+graphical.gui.vstack.VStack --* graphical.scenes.level_select.LevelSelect : stack
+graphical.gui.vstack.VStack --* graphical.scenes.menu.MainMenu : stack
+graphical.gui.vstack.VStack --* graphical.scenes.paused.Paused : stack
 graphical.scene.Scene --* graphical.scene.PushScene : scene
 graphical.scene.Scene --* graphical.scene.SwitchScene : scene
+graphical.scenes.playing.renderer.Renderer --* graphical.scenes.playing.scene.Playing : renderer
+wumpus.level.Level --* graphical.scenes.playing.scene.Playing : level
 wumpus.level.Level --* wumpus.tests.test_player.TestPlayerController : level
+wumpus.player.PlayerController --* graphical.scenes.playing.scene.Playing : player
 wumpus.player.PlayerController --* wumpus.tests.test_player.TestPlayerController : player
+wumpus.level.Level --o graphical.scenes.playing.renderer.Renderer : level
 wumpus.level.Level --o wumpus.player.PlayerController : level
 @enduml

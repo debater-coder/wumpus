@@ -14,7 +14,25 @@ package "graphical.gui.element" as graphical.gui.element {
 }
 package "graphical.gui.vstack" as graphical.gui.vstack {
 }
+package "graphical.icons" as graphical.icons {
+}
 package "graphical.scene" as graphical.scene {
+}
+package "graphical.scenes" as graphical.scenes {
+}
+package "graphical.scenes.how_to_play" as graphical.scenes.how_to_play {
+}
+package "graphical.scenes.level_select" as graphical.scenes.level_select {
+}
+package "graphical.scenes.menu" as graphical.scenes.menu {
+}
+package "graphical.scenes.paused" as graphical.scenes.paused {
+}
+package "graphical.scenes.playing" as graphical.scenes.playing {
+}
+package "graphical.scenes.playing.renderer" as graphical.scenes.playing.renderer {
+}
+package "graphical.scenes.playing.scene" as graphical.scenes.playing.scene {
 }
 package "graphical.utils" as graphical.utils {
 }
@@ -39,10 +57,32 @@ package "wumpus.tests.test_hazards" as wumpus.tests.test_hazards {
 package "wumpus.tests.test_player" as wumpus.tests.test_player {
 }
 graphical.__main__ --> graphical.scene
+graphical.__main__ --> graphical.scenes.menu
 graphical.gui --> graphical.gui.button
 graphical.gui --> graphical.gui.vstack
 graphical.gui.button --> graphical.gui.element
 graphical.gui.vstack --> graphical.gui.element
+graphical.scenes --> graphical.scenes.how_to_play
+graphical.scenes --> graphical.scenes.level_select
+graphical.scenes --> graphical.scenes.menu
+graphical.scenes --> graphical.scenes.playing.scene
+graphical.scenes.level_select --> graphical.scenes.menu
+graphical.scenes.level_select --> graphical.scenes.playing
+graphical.scenes.menu --> graphical.scenes.how_to_play
+graphical.scenes.menu --> graphical.scenes.level_select
+graphical.scenes.paused --> graphical.scenes.how_to_play
+graphical.scenes.paused --> graphical.scenes.menu
+graphical.scenes.playing --> graphical.scenes.playing.scene
+graphical.scenes.playing.renderer --> graphical.colours
+graphical.scenes.playing.renderer --> graphical.utils
+graphical.scenes.playing.renderer --> wumpus.hazards
+graphical.scenes.playing.renderer --> wumpus.level
+graphical.scenes.playing.scene --> graphical.colours
+graphical.scenes.playing.scene --> graphical.scene
+graphical.scenes.playing.scene --> graphical.scenes.paused
+graphical.scenes.playing.scene --> graphical.scenes.playing.renderer
+graphical.scenes.playing.scene --> wumpus
+graphical.scenes.playing.scene --> wumpus.levels
 wumpus --> wumpus.cave
 wumpus --> wumpus.level
 wumpus --> wumpus.player
@@ -52,6 +92,7 @@ wumpus.level --> wumpus.cave
 wumpus.level --> wumpus.events
 wumpus.level --> wumpus.hazards
 wumpus.player --> wumpus.events
+wumpus.player --> wumpus.hazards
 wumpus.player --> wumpus.level
 wumpus.tests.test_hazards --> wumpus
 wumpus.tests.test_hazards --> wumpus.cave
