@@ -1,4 +1,5 @@
 import pygame as pg
+import math
 import importlib.resources
 from typing import Optional
 
@@ -97,3 +98,11 @@ def load_and_recolor_icon(package, filename: str, color) -> Optional[pg.Surface]
     if original:
         return recolor_icon(original, color)
     return None
+
+def tween(t: float):
+    """
+    Returns a number between 0 and 1 based on a time value.
+    Uses the ease-in-out-sinusoidal function to naturally
+    transition between two values.
+    """
+    return -(math.cos(math.pi * t) - 1) / 2

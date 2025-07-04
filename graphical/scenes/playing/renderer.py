@@ -46,6 +46,19 @@ class Renderer:
 
     def reset_rotor(self):
         self.rotor = self.algebra.scalar(np.array([1]))
+        if self.dimension == 4:
+            self.rotate(
+                self.basis_vectors[3][1] ^ self.basis_vectors[0][1],
+                math.pi / 4
+            )
+            self.rotate(
+                self.basis_vectors[3][1] ^ self.basis_vectors[1][1],
+                math.pi / 4
+            )
+            self.rotate(
+                self.basis_vectors[3][1] ^ self.basis_vectors[2][1],
+                math.pi / 4
+            )
 
     def rotate(self, bivector: MultiVector, angle: float):
         """Rotate on bivector by angle."""
@@ -127,18 +140,16 @@ class Renderer:
     def create_drawables(self, player_location: int | None) -> list[Drawable]:
         """Create all drawable objects for the level."""
         drawables = []
-        
-        # Create cave drawables
+
         for cave in self.level.level.values():
             drawable_cave = DrawableCave(cave=cave, explored=True)
             drawables.append(drawable_cave)
-        
-        # Create player drawable if location is provided
+
         if player_location is not None:
             player_cave = self.level.get_cave(player_location)
             drawable_player = DrawablePlayer(cave=player_cave)
             drawables.append(drawable_player)
-            
+
         return drawables
 
     def draw_icon(
@@ -161,12 +172,10 @@ class Renderer:
 
     def paint(self, surf: pg.surface.Surface, location: int | None):
         """Draws level to screen."""
-        # Create render context
         context = RenderContext(self, self.level)
-        
-        # Create all drawable objects
+
         drawables = self.create_drawables(location)
-        
+
         # Sort by depth (farthest first) so closer objects render on top
         # Objects with larger perpendicular distance along the third basis are farther away
         # Reverse=True means farthest objects are drawn first (painter's algorithm)
@@ -174,26 +183,20 @@ class Renderer:
             key=lambda drawable: self.perp_dist(self.rotated(drawable.get_coords())),
             reverse=True
         )
-        
-        # Debug depth sorting (uncomment for debugging)
-        # self._debug_depth_order(drawables, location)
-        
-        # Draw tunnels first (behind everything)
+
         self._draw_tunnels(surf)
-        
-        # Draw all objects in depth order along the line of sight - player will be correctly 
-        # depth-sorted with caves instead of always appearing on top
+
         for drawable in drawables:
             drawable.paint(surf, context)
-    
+
     def _draw_tunnels(self, surf: pg.surface.Surface):
         """Draw all tunnel connections between caves."""
         drawn = set()
         caves = self.level.level
-        
+
         for cave in caves.values():
             coords = self.rotated(np.array(cave.coords))
-            
+
             for edge in cave.tunnels:
                 edge_coords = self.rotated(np.array(caves[edge].coords))
                 if (cave.location, edge) in drawn:
@@ -205,20 +208,3 @@ class Renderer:
                     pg.Vector2(self.project(coords, surf)),
                 )
                 drawn.add((edge, cave.location))
-    
-    def _debug_depth_order(self, drawables: list[Drawable], player_location: int | None):
-        """Debug method to print depth order of drawable objects along the line of sight."""
-        print(f"\nDepth order for {len(drawables)} drawables:")
-        for i, drawable in enumerate(drawables):
-            coords = self.rotated(drawable.get_coords())
-            depth = self.perp_dist(coords)
-            drawable_type = type(drawable).__name__
-            
-            # Check if this is the player
-            is_player = (isinstance(drawable, DrawablePlayer) and 
-                        player_location is not None and
-                        drawable.cave.location == player_location)
-            
-            marker = " <-- PLAYER" if is_player else ""
-            print(f"  {i}: {drawable_type} at depth {depth:.2f}{marker}")
-
