@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 class RenderContext:
     """Provides rendering utilities and dependencies to Drawable objects."""
 
-    def __init__(self, renderer: 'Renderer', level: 'Level'):
+    def __init__(self, renderer: Renderer, level: Level):
         self.renderer = renderer
         self.level = level
 
@@ -53,7 +53,14 @@ class RenderContext:
         """Apply depth-based color fading along the line of sight."""
         return self.renderer.apply_depth_fade(color, coords)
 
-    def draw_icon(self, surf: pg.Surface, icon: pg.Surface, size: int, opacity: int, center: pg.Vector2):
+    def draw_icon(
+        self,
+        surf: pg.Surface,
+        icon: pg.Surface,
+        size: int,
+        opacity: int,
+        center: pg.Vector2,
+    ):
         """Draw an icon with scaling and opacity."""
         self.renderer.draw_icon(surf, icon, size, opacity, center)
 

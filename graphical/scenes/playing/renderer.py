@@ -4,7 +4,7 @@ import numpy.typing as npt
 import pygame as pg
 import math
 
-from wumpus.level import Level
+from wumpus import Level, Cave
 
 from graphical.colours import COLOURS
 from graphical.utils import apply_fade, load_and_recolor_icon
@@ -48,16 +48,13 @@ class Renderer:
         self.rotor = self.algebra.scalar(np.array([1]))
         if self.dimension == 4:
             self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[0][1],
-                math.pi / 4
+                self.basis_vectors[3][1] ^ self.basis_vectors[0][1], math.pi / 4
             )
             self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[1][1],
-                math.pi / 4
+                self.basis_vectors[3][1] ^ self.basis_vectors[1][1], math.pi / 4
             )
             self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[2][1],
-                math.pi / 4
+                self.basis_vectors[3][1] ^ self.basis_vectors[2][1], math.pi / 4
             )
 
     def rotate(self, bivector: MultiVector, angle: float):
@@ -137,12 +134,24 @@ class Renderer:
             graphical.icons, "player.png", COLOURS["yellow_400"]
         )
 
-    def create_drawables(self, player_location: int | None) -> list[Drawable]:
+    def create_drawables(
+        self,
+        player_location: int | None,
+        hovered_cave: int | None,
+        shooting_path: list[int],
+    ) -> list[Drawable]:
         """Create all drawable objects for the level."""
         drawables = []
 
         for cave in self.level.level.values():
-            drawable_cave = DrawableCave(cave=cave, explored=True)
+            is_hovered = cave.location == hovered_cave
+            is_in_shooting_path = cave.location in shooting_path
+            drawable_cave = DrawableCave(
+                cave=cave,
+                explored=True,
+                is_hovered=is_hovered,
+                is_in_shooting_path=is_in_shooting_path,
+            )
             drawables.append(drawable_cave)
 
         if player_location is not None:
@@ -170,24 +179,46 @@ class Renderer:
         icon_rect = icon_with_alpha.get_rect(center=center)
         surf.blit(icon_with_alpha, icon_rect)
 
-    def paint(self, surf: pg.surface.Surface, location: int | None):
+    def paint(
+        self,
+        surf: pg.surface.Surface,
+        location: int | None,
+        mouse_pos: pg.Vector2,
+        shooting_path: list[int],
+    ):
         """Draws level to screen."""
         context = RenderContext(self, self.level)
 
-        drawables = self.create_drawables(location)
+        hovered_cave = self.get_cave_at_pos(mouse_pos)
+        drawables = self.create_drawables(
+            location,
+            hovered_cave.location if hovered_cave else None,
+            shooting_path,
+        )
 
         # Sort by depth (farthest first) so closer objects render on top
         # Objects with larger perpendicular distance along the third basis are farther away
         # Reverse=True means farthest objects are drawn first (painter's algorithm)
         drawables.sort(
             key=lambda drawable: self.perp_dist(self.rotated(drawable.get_coords())),
-            reverse=True
+            reverse=True,
         )
 
         self._draw_tunnels(surf)
 
         for drawable in drawables:
             drawable.paint(surf, context)
+
+    def get_cave_at_pos(self, pos: pg.Vector2) -> "Cave | None":
+        """Get the cave at a given position on the screen."""
+        for cave in self.level.level.values():
+            coords = self.rotated(np.array(cave.coords))
+            center = self.project(coords, pg.display.get_surface())
+            radius = 100 / max(self.perp_dist(coords), 1e-6)
+
+            if pos.distance_to(center) <= radius:
+                return cave
+        return None
 
     def _draw_tunnels(self, surf: pg.surface.Surface):
         """Draw all tunnel connections between caves."""

@@ -32,11 +32,45 @@ class Playing(Scene):
 
         self.renderer = Renderer(self.level, fov=90)
 
+        self.shooting_path: list[int] = []
+
+    def handle_mouse_click(self, event: pg.event.Event):
+        clicked_cave = self.renderer.get_cave_at_pos(pg.Vector2(event.pos))
+        if clicked_cave is None:
+            self.shooting_path = []
+            return
+
+        if event.button == 1:  # Left mouse button
+            if clicked_cave.location in self.player.cave.tunnels:
+                self.player.move(clicked_cave.location)
+        elif event.button == 3:  # Right mouse button
+            if (
+                not self.shooting_path
+                and clicked_cave.location in self.player.cave.tunnels
+            ):
+                self.shooting_path.append(clicked_cave.location)
+            elif (
+                clicked_cave.location
+                in self.level.get_cave(self.shooting_path[-1]).tunnels
+            ):
+                self.shooting_path.append(clicked_cave.location)
+            else:
+                self.shooting_path = []
+
     def update(self) -> Iterator[SceneEvent]:
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
                 case pg.K_ESCAPE:
                     yield PushScene(Paused(self.screen))
+                case pg.K_RETURN:
+                    if self.shooting_path:
+                        self.player.shoot(self.shooting_path)
+                        self.shooting_path = []
+                case pg.K_c:
+                    self.shooting_path = []
+
+        for event in pg.event.get(eventtype=pg.MOUSEBUTTONUP):
+            self.handle_mouse_click(event)
 
         for event in pg.event.get(eventtype=pg.MOUSEWHEEL):
             self.renderer.zoom(event.precise_y)
@@ -62,7 +96,12 @@ class Playing(Scene):
             self.text, self.text.get_rect(center=self.screen.get_rect().center)
         )
 
-        self.renderer.paint(self.screen, self.player.cave.location)
+        self.renderer.paint(
+            self.screen,
+            self.player.cave.location,
+            pg.Vector2(pg.mouse.get_pos()),
+            self.shooting_path,
+        )
 
         pg.display.flip()
 

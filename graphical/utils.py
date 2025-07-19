@@ -99,6 +99,7 @@ def load_and_recolor_icon(package, filename: str, color) -> Optional[pg.Surface]
         return recolor_icon(original, color)
     return None
 
+
 def tween(t: float):
     """
     Returns a number between 0 and 1 based on a time value.

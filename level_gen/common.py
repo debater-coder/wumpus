@@ -5,14 +5,16 @@ import numpy.typing as npt
 import math
 
 
-
 @dataclass
 class Node:
     index: int
     edges: list[int]
     vector: npt.NDArray
 
-def graph_from_edge_length(coords: list[npt.NDArray], edge_length: float, tolerance: float) -> list[Node]:
+
+def graph_from_edge_length(
+    coords: list[npt.NDArray], edge_length: float, tolerance: float
+) -> list[Node]:
     """
     Generates a graph from a list of points, where two nodes
     are joined by an edge only when it is within a tolerance
@@ -31,6 +33,7 @@ def graph_from_edge_length(coords: list[npt.NDArray], edge_length: float, tolera
         nodes.append(Node(i, edges, a))
 
     return nodes
+
 
 def dump(nodes: list[Node], file: str):
     """Exports nodes to JSON"""
