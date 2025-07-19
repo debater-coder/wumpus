@@ -6,7 +6,7 @@ from graphical.colours import COLOURS
 import numpy as np
 import pygame as pg
 
-__all__ = ['DrawableCave', 'DrawablePlayer']
+__all__ = ["DrawableCave", "DrawablePlayer"]
 
 
 @dataclass
@@ -109,20 +109,20 @@ class DrawableCave(Drawable):
 @dataclass
 class DrawablePlayer(Drawable):
     cave: Cave
-    
+
     def get_coords(self) -> np.ndarray:
         return np.array(self.cave.coords)
-    
+
     def paint(self, surf: pg.Surface, context: RenderContext):
         coords = context.get_rotated_coords(self.get_coords())
-        
+
         # Skip if behind camera
         if context.perp_dist(coords) <= 0:
             return
-            
+
         center = context.project(coords, surf)
         size = int(160 / context.perp_dist(coords))
         opacity = int(255 - 255 * max(0, min(0.5, coords[2])))
-        
+
         if context.player_icon:
             context.draw_icon(surf, context.player_icon, size, opacity, center)

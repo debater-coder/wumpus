@@ -4,7 +4,7 @@ import numpy.typing as npt
 import pygame as pg
 import math
 
-from wumpus.level import Level
+from wumpus import Level, Cave
 
 from graphical.colours import COLOURS
 from graphical.utils import apply_fade, load_and_recolor_icon
@@ -48,16 +48,13 @@ class Renderer:
         self.rotor = self.algebra.scalar(np.array([1]))
         if self.dimension == 4:
             self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[0][1],
-                math.pi / 4
+                self.basis_vectors[3][1] ^ self.basis_vectors[0][1], math.pi / 4
             )
             self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[1][1],
-                math.pi / 4
+                self.basis_vectors[3][1] ^ self.basis_vectors[1][1], math.pi / 4
             )
             self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[2][1],
-                math.pi / 4
+                self.basis_vectors[3][1] ^ self.basis_vectors[2][1], math.pi / 4
             )
 
     def rotate(self, bivector: MultiVector, angle: float):
@@ -204,7 +201,7 @@ class Renderer:
         # Reverse=True means farthest objects are drawn first (painter's algorithm)
         drawables.sort(
             key=lambda drawable: self.perp_dist(self.rotated(drawable.get_coords())),
-            reverse=True
+            reverse=True,
         )
 
         self._draw_tunnels(surf)
