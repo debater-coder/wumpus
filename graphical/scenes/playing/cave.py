@@ -13,19 +13,37 @@ __all__ = ['DrawableCave', 'DrawablePlayer']
 class DrawableCave(Drawable):
     cave: Cave
     explored: bool = True
+    is_hovered: bool = False
+    is_in_shooting_path: bool = False
 
     def get_coords(self) -> np.ndarray:
         return np.array(self.cave.coords)
 
     def paint(self, surf: pg.Surface, context: RenderContext):
         coords = context.get_rotated_coords(self.get_coords())
-        
+
         # Skip caves that are behind the camera
         if context.perp_dist(coords) <= 0:
             return
 
         center = context.project(coords, surf)
         radius = 100 / context.perp_dist(coords)
+
+        if self.is_hovered:
+            pg.draw.circle(
+                surf,
+                context.apply_depth_fade(COLOURS["yellow_500"], coords),
+                center,
+                radius + 20,
+            )
+
+        if self.is_in_shooting_path:
+            pg.draw.circle(
+                surf,
+                context.apply_depth_fade(COLOURS["red_500"], coords),
+                center,
+                radius + 15,
+            )
 
         hazard_in_cave = context.level.get_hazard_in_cave(self.cave)
         nearby_hazards = context.level.get_nearby_hazards(self.cave)
