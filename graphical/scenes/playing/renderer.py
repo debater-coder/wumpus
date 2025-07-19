@@ -217,7 +217,7 @@ class Renderer:
         for cave in self.level.level.values():
             coords = self.rotated(np.array(cave.coords))
             center = self.project(coords, pg.display.get_surface())
-            radius = 100 / self.perp_dist(coords)
+            radius = 100 / max(self.perp_dist(coords), 1e-6)
 
             if pos.distance_to(center) <= radius:
                 return cave
