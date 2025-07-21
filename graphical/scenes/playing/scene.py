@@ -29,6 +29,7 @@ class Playing(Scene):
         )
         self.level = Level(self.map)
         self.player = PlayerController(self.level)
+        self.explored = {self.player.cave.location}
 
         self.renderer = Renderer(self.level, fov=90)
 
@@ -43,6 +44,7 @@ class Playing(Scene):
         if event.button == 1:  # Left mouse button
             if clicked_cave.location in self.player.cave.tunnels:
                 self.player.move(clicked_cave.location)
+                self.explored.add(clicked_cave.location)
         elif event.button == 3:  # Right mouse button
             if (
                 not self.shooting_path
@@ -101,6 +103,7 @@ class Playing(Scene):
             self.player.cave.location,
             pg.Vector2(pg.mouse.get_pos()),
             self.shooting_path,
+            self.explored,
         )
 
         pg.display.flip()
