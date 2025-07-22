@@ -46,7 +46,6 @@ class Renderer:
 
         self.rotor = ((target * coords).normalized().sqrt() * self.rotor).normalized()
 
-
     def reset_zoom(self):
         """positions camera at (0, 0, -5, 0, 0, ...)"""
         self.camera_pos = np.array([0, 0, -5] + [0] * (self.dimension - 3))
@@ -148,7 +147,7 @@ class Renderer:
         shooting_path: list[int],
         explored: set[int],
         near_wumpus: set[int],
-        show_wumpus: bool
+        show_wumpus: bool,
     ) -> list[Drawable]:
         """Create all drawable objects for the level."""
         drawables = []
@@ -163,7 +162,7 @@ class Renderer:
                 is_hovered=is_hovered,
                 is_in_shooting_path=is_in_shooting_path,
                 near_wumpus=cave_location in near_wumpus,
-                show_wumpus=show_wumpus
+                show_wumpus=show_wumpus,
             )
             drawables.append(drawable_cave)
 
@@ -215,7 +214,7 @@ class Renderer:
         shooting_path: list[int],
         explored: set[int],
         near_wumpus: set[int],
-        show_wumpus: bool
+        show_wumpus: bool,
     ):
         """Draws level to screen."""
         context = RenderContext(self, self.level)
@@ -227,7 +226,7 @@ class Renderer:
             shooting_path,
             explored,
             near_wumpus,
-            show_wumpus
+            show_wumpus,
         )
 
         # Sort by depth (farthest first) so closer objects render on top

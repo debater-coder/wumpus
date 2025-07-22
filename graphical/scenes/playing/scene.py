@@ -130,7 +130,7 @@ class Playing(Scene):
             self.shooting_path,
             self.explored,
             self.wumpus_indicators,
-            self.player.win
+            self.player.win,
         )
 
         pg.display.flip()
