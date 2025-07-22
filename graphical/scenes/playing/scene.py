@@ -48,7 +48,7 @@ class Playing(Scene):
         if event.button == 1:  # Left mouse button
             if clicked_cave.location in self.player.cave.tunnels:
                 self.player.move(clicked_cave.location)
-                self.renderer.focus_cave(clicked_cave)
+                self.renderer.focus_cave(self.player.cave)
                 self.explored.add(self.player.cave.location)
                 self.explored.add(clicked_cave.location)
         elif event.button == 3:  # Right mouse button
