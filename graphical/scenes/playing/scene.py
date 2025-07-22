@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from typing import override
 import pygame as pg
 import importlib.resources
 
@@ -57,7 +58,8 @@ class Playing(Scene):
             else:
                 self.shooting_path = []
 
-    def update(self) -> Iterator[SceneEvent]:
+    @override
+    def handle_pg_events(self) -> Iterator[SceneEvent]:
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
                 case pg.K_ESCAPE:
@@ -90,21 +92,16 @@ class Playing(Scene):
                         event.rel[1] / 1000,
                     )
 
-    def paint(self):
-        self.screen.blit(self.background, (0, 0))
-        self.screen.blit(
+    @override
+    def draw(self, surface: pg.Surface, delta: float):
+        surface.blit(self.background, (0, 0))
+        surface.blit(
             self.text, self.text.get_rect(center=self.screen.get_rect().center)
         )
 
         self.renderer.paint(
-            self.screen,
+            surface,
             self.player.cave.location,
             pg.Vector2(pg.mouse.get_pos()),
             self.shooting_path,
         )
-
-        pg.display.flip()
-
-    def handle_pg_events(self):
-        yield from self.update()
-        self.paint()

@@ -1,3 +1,4 @@
+from typing import override
 import pygame as pg
 
 from ..utils import button_up
@@ -17,10 +18,12 @@ class HowToPlay(Scene):
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["zinc_950"])
 
+    @override
     def handle_pg_events(self):
-        self.screen.blit(self.background, (0, 0))
         if self.back.update(button_up()):
             yield PopScene()
 
-        self.back.paint(self.screen)
-        pg.display.flip()
+    @override
+    def draw(self, surface: pg.Surface, delta: float):
+        surface.blit(self.background, (0, 0))
+        self.back.paint(surface)

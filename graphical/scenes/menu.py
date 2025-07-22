@@ -1,6 +1,8 @@
 from collections.abc import Iterator
+from typing import override
 import pygame as pg
 
+from ..transition import NewTransition
 from ..utils import button_up
 
 from ..scene import PushScene, Scene, SceneEvent, SwitchScene
@@ -29,7 +31,8 @@ class MainMenu(Scene):
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["zinc_950"])
 
-    def update(self) -> Iterator[SceneEvent]:
+    @override
+    def handle_pg_events(self) -> Iterator[SceneEvent]:
         self.stack.rect.center = self.screen.get_rect().center
         self.stack.update()
         up = button_up()
@@ -37,19 +40,14 @@ class MainMenu(Scene):
         level_select, how_to_play = [button.update(up) for button in self.buttons]
 
         if level_select:
-            yield SwitchScene(LevelSelect(self.screen))
+            yield NewTransition(LevelSelect(self.screen))
 
         if how_to_play:
             yield PushScene(HowToPlay(self.screen))
 
-    def paint(self):
-        self.screen.blit(self.background, (0, 0))
+    @override
+    def draw(self, surface: pg.Surface, delta: float):
+        surface.blit(self.background, (0, 0))
 
         for button in self.buttons:
-            button.paint(self.screen)
-
-        pg.display.flip()
-
-    def handle_pg_events(self):
-        yield from self.update()
-        self.paint()
+            button.paint(surface)

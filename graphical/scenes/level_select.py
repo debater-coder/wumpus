@@ -1,6 +1,8 @@
 from collections.abc import Iterator
+from typing import override
 import pygame as pg
 
+from ..transition import NewTransition
 from ..utils import button_up
 
 from ..scene import PushScene, Scene, SceneEvent, SwitchScene
@@ -25,7 +27,8 @@ class LevelSelect(Scene):
 
         self.back = Button(pg.Rect(40, 40, 300, 80), "Back", font)
 
-    def update(self) -> Iterator[SceneEvent]:
+    @override
+    def handle_pg_events(self) -> Iterator[SceneEvent]:
         self.stack.rect.center = self.screen.get_rect().center
         self.stack.update()
 
@@ -33,25 +36,20 @@ class LevelSelect(Scene):
         if self.back.update(up):
             from .menu import MainMenu
 
-            yield SwitchScene(MainMenu(self.screen))
+            yield NewTransition(MainMenu(self.screen))
 
         updates = [button.update(up) for button in self.buttons]
 
         try:
-            yield PushScene(Playing(self.screen, level_index=updates.index(True)))
+            yield NewTransition(Playing(self.screen, level_index=updates.index(True)))
         except ValueError:
             pass
 
-    def paint(self):
-        self.screen.blit(self.background, (0, 0))
+    @override
+    def draw(self, surface: pg.Surface, delta: float):
+        surface.blit(self.background, (0, 0))
 
-        self.back.paint(self.screen)
+        self.back.paint(surface)
 
         for button in self.buttons:
-            button.paint(self.screen)
-
-        pg.display.flip()
-
-    def handle_pg_events(self):
-        yield from self.update()
-        self.paint()
+            button.paint(surface)

@@ -1,9 +1,18 @@
 from __future__ import annotations
+
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import assert_never
+from typing import TYPE_CHECKING, assert_never
 
-type SceneEvent = PushScene | PopScene | SwitchScene
+if TYPE_CHECKING:
+    from .transition import NewTransition, Transition
+
+type SceneEvent = PushScene | PopScene | SwitchScene | NewTransition
+
+
+@dataclass
+class SwitchScene:
+    scene: Scene
 
 
 @dataclass
@@ -37,6 +46,9 @@ class Scene:
     def handle_pg_events(self) -> Iterator[SceneEvent]:
         yield from []
 
+    def draw(self, surface, delta: float):
+        ...
+
 
 class SceneManager:
     """
@@ -48,8 +60,9 @@ class SceneManager:
 
     def __init__(self):
         self.scenes: list[Scene] = []
+        self.transition: Transition | None = None
 
-    def current(self):
+    def current(self) -> Scene | None:
         if len(self.scenes) > 0:
             return self.scenes[-1]
         return None
@@ -81,8 +94,13 @@ class SceneManager:
 
     def handle_pg_events(self):
         """Passes pygame events to the current scene."""
+        if self.transition is not None:
+            return
+
         if not (current := self.current()):
             return
+
+        from .transition import NewTransition, Transition
 
         for event in current.handle_pg_events():
             match event:
@@ -92,5 +110,22 @@ class SceneManager:
                     self.push(scene)
                 case SwitchScene(scene):
                     self.switch(scene)
+                case NewTransition(new_scene, duration):
+                    self.transition = Transition(
+                        from_scene=self.current(),
+                        to_scene=new_scene,
+                        transition_duration=duration,
+                    )
+                    self.transition.enter()
+                    self.switch(new_scene)
                 case _:
                     assert_never(event)
+
+    def draw(self, surface: pg.Surface, delta: float):
+        """Draws the current scene."""
+        if self.transition is not None:
+            self.transition.draw(surface, delta)
+            if not self.transition.is_blocking():
+                self.transition = None
+        elif scene := self.current():
+            scene.draw(surface, delta)

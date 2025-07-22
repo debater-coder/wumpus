@@ -12,13 +12,18 @@ scene_manager = SceneManager()
 scene_manager.push(MainMenu(screen))
 
 while True:
-    clock.tick(60)
+    delta = clock.tick(60) / 1000.0
 
     if pg.event.peek(eventtype=pg.QUIT):
         break
 
     scene_manager.handle_pg_events()
     pg.event.pump()
+
+    scene_manager.draw(screen, delta)
+
+
+    pg.display.flip()
 
 
 pg.quit()
