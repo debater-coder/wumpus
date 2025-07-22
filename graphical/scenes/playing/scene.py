@@ -35,6 +35,7 @@ class Playing(Scene):
         self.wumpus_indicators: set[int] = set()
 
         self.renderer = Renderer(self.level, fov=90)
+        self.renderer.focus_cave(self.player.cave)
 
         self.shooting_path: list[int] = []
 
@@ -47,6 +48,7 @@ class Playing(Scene):
         if event.button == 1:  # Left mouse button
             if clicked_cave.location in self.player.cave.tunnels:
                 self.player.move(clicked_cave.location)
+                self.renderer.focus_cave(clicked_cave)
                 self.explored.add(self.player.cave.location)
                 self.explored.add(clicked_cave.location)
         elif event.button == 3:  # Right mouse button
@@ -65,6 +67,7 @@ class Playing(Scene):
 
     def respawn(self):
         self.player.respawn()
+        self.renderer.focus_cave(self.player.cave)
         self.wumpus_indicators = set()
 
     def update(self) -> Iterator[SceneEvent]:

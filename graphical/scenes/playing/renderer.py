@@ -40,6 +40,13 @@ class Renderer:
 
         self.load_icons()
 
+    def focus_cave(self, cave: Cave):
+        coords = self.algebra.vector(self.rotated(np.array(cave.coords))).normalized()
+        target = -self.basis_vectors[2][1]
+
+        self.rotor = ((target * coords).normalized().sqrt() * self.rotor).normalized()
+
+
     def reset_zoom(self):
         """positions camera at (0, 0, -5, 0, 0, ...)"""
         self.camera_pos = np.array([0, 0, -5] + [0] * (self.dimension - 3))
