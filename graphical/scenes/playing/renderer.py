@@ -252,7 +252,8 @@ class Renderer:
         drawn = set()
         caves = self.level.level
 
-        for cave in [caves[location] for location in explored]:
+        for location in explored:
+            cave = caves[location]
             coords = self.rotated(np.array(cave.coords))
 
             for edge in cave.tunnels:
