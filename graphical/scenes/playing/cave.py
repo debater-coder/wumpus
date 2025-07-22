@@ -13,8 +13,10 @@ __all__ = ["DrawableCave", "DrawablePlayer"]
 class DrawableCave(Drawable):
     cave: Cave
     explored: bool = True
+    near_wumpus: bool = False
     is_hovered: bool = False
     is_in_shooting_path: bool = False
+    show_wumpus: bool = False
 
     def get_coords(self) -> np.ndarray:
         return np.array(self.cave.coords)
@@ -53,11 +55,10 @@ class DrawableCave(Drawable):
         has_nearby_bats = any(
             isinstance(hazard, Superbats) for hazard in nearby_hazards
         )
-        has_nearby_wumpus = any(isinstance(hazard, Wumpus) for hazard in nearby_hazards)
 
         outline_layers = []
 
-        if not hazard_in_cave:
+        if not hazard_in_cave and self.explored:
             if has_nearby_pit:
                 outline_layers.append((COLOURS["green_500"], radius + 10))
 
@@ -82,19 +83,20 @@ class DrawableCave(Drawable):
         pg.draw.circle(surf, tinted_interior, center, radius)
 
         # Wumpus indicator
-        if has_nearby_wumpus and not hazard_in_cave:
+        if self.near_wumpus:
             wumpus_radius = radius * 2 / 3
             tinted_orange = context.apply_depth_fade(COLOURS["orange_500"], coords)
             pg.draw.circle(surf, tinted_orange, center, wumpus_radius)
 
         hazard_icon = None
-        match hazard_in_cave:
-            case BottomlessPit():
-                hazard_icon = context.pit_icon
-            case Superbats():
-                hazard_icon = context.bat_icon
-            case Wumpus():
-                hazard_icon = context.wumpus_icon
+        if self.explored:
+            match hazard_in_cave:
+                case BottomlessPit():
+                    hazard_icon = context.pit_icon
+                case Superbats():
+                    hazard_icon = context.bat_icon
+                case Wumpus() if self.show_wumpus:
+                    hazard_icon = context.wumpus_icon
 
         if hazard_icon:
             context.draw_icon(

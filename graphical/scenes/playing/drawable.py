@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 class RenderContext:
     """Provides rendering utilities and dependencies to Drawable objects."""
 
-    def __init__(self, renderer: Renderer, level: Level):
+    def __init__(self, renderer: "Renderer", level: "Level"):
         self.renderer = renderer
         self.level = level
 
