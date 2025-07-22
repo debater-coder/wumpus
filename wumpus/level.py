@@ -138,7 +138,7 @@ class Level:
             (hazard for hazard in self.hazards.values() if isinstance(hazard, Wumpus))
         ).location
         if not cave:
-            raise ValueError
+            raise ValueError()
         return cave
 
     def choose_empty_cave(self) -> Cave:

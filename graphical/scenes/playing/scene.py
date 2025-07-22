@@ -3,6 +3,7 @@ import pygame as pg
 import importlib.resources
 
 from wumpus import Level, PlayerController
+from wumpus.hazards import Wumpus
 import wumpus.levels
 
 from graphical.scene import PushScene, Scene, SceneEvent
@@ -30,6 +31,9 @@ class Playing(Scene):
         self.level = Level(self.map)
         self.player = PlayerController(self.level)
 
+        self.explored = {self.player.cave.location}
+        self.wumpus_indicators: set[int] = set()
+
         self.renderer = Renderer(self.level, fov=90)
 
         self.shooting_path: list[int] = []
@@ -43,6 +47,8 @@ class Playing(Scene):
         if event.button == 1:  # Left mouse button
             if clicked_cave.location in self.player.cave.tunnels:
                 self.player.move(clicked_cave.location)
+                self.explored.add(self.player.cave.location)
+                self.explored.add(clicked_cave.location)
         elif event.button == 3:  # Right mouse button
             if (
                 not self.shooting_path
@@ -57,6 +63,10 @@ class Playing(Scene):
             else:
                 self.shooting_path = []
 
+    def respawn(self):
+        self.player.respawn()
+        self.wumpus_indicators = set()
+
     def update(self) -> Iterator[SceneEvent]:
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
@@ -68,6 +78,20 @@ class Playing(Scene):
                         self.shooting_path = []
                 case pg.K_c:
                     self.shooting_path = []
+
+        if not self.player.alive:
+            # TODO: death screen
+            yield PushScene(Paused(self.screen))
+            self.respawn()
+
+        if self.player.win:
+            self.explored = set(self.level.level.keys())
+
+        for location in self.player.cave.tunnels:
+            if isinstance(
+                self.level.get_hazard_in_cave(self.level.get_cave(location)), Wumpus
+            ):
+                self.wumpus_indicators.add(self.player.cave.location)
 
         for event in pg.event.get(eventtype=pg.MOUSEBUTTONUP):
             self.handle_mouse_click(event)
@@ -101,6 +125,9 @@ class Playing(Scene):
             self.player.cave.location,
             pg.Vector2(pg.mouse.get_pos()),
             self.shooting_path,
+            self.explored,
+            self.wumpus_indicators,
+            self.player.win
         )
 
         pg.display.flip()

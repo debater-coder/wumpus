@@ -139,20 +139,41 @@ class Renderer:
         player_location: int | None,
         hovered_cave: int | None,
         shooting_path: list[int],
+        explored: set[int],
+        near_wumpus: set[int],
+        show_wumpus: bool
     ) -> list[Drawable]:
         """Create all drawable objects for the level."""
         drawables = []
 
-        for cave in self.level.level.values():
-            is_hovered = cave.location == hovered_cave
-            is_in_shooting_path = cave.location in shooting_path
+        for cave_location in explored:
+            is_hovered = cave_location == hovered_cave
+            is_in_shooting_path = cave_location in shooting_path
+            cave = self.level.get_cave(cave_location)
             drawable_cave = DrawableCave(
                 cave=cave,
                 explored=True,
                 is_hovered=is_hovered,
                 is_in_shooting_path=is_in_shooting_path,
+                near_wumpus=cave_location in near_wumpus,
+                show_wumpus=show_wumpus
             )
             drawables.append(drawable_cave)
+
+            for adjacent_cave_location in cave.tunnels:
+                if adjacent_cave_location in explored:
+                    continue
+
+                is_hovered = adjacent_cave_location == hovered_cave
+                is_in_shooting_path = adjacent_cave_location in shooting_path
+                adjacent_cave = self.level.get_cave(adjacent_cave_location)
+                drawable_cave = DrawableCave(
+                    cave=adjacent_cave,
+                    explored=False,
+                    is_hovered=is_hovered,
+                    is_in_shooting_path=is_in_shooting_path,
+                )
+                drawables.append(drawable_cave)
 
         if player_location is not None:
             player_cave = self.level.get_cave(player_location)
@@ -185,6 +206,9 @@ class Renderer:
         location: int | None,
         mouse_pos: pg.Vector2,
         shooting_path: list[int],
+        explored: set[int],
+        near_wumpus: set[int],
+        show_wumpus: bool
     ):
         """Draws level to screen."""
         context = RenderContext(self, self.level)
@@ -194,6 +218,9 @@ class Renderer:
             location,
             hovered_cave.location if hovered_cave else None,
             shooting_path,
+            explored,
+            near_wumpus,
+            show_wumpus
         )
 
         # Sort by depth (farthest first) so closer objects render on top
@@ -204,7 +231,7 @@ class Renderer:
             reverse=True,
         )
 
-        self._draw_tunnels(surf)
+        self._draw_tunnels(surf, explored)
 
         for drawable in drawables:
             drawable.paint(surf, context)
@@ -220,12 +247,13 @@ class Renderer:
                 return cave
         return None
 
-    def _draw_tunnels(self, surf: pg.surface.Surface):
+    def _draw_tunnels(self, surf: pg.surface.Surface, explored: set[int]):
         """Draw all tunnel connections between caves."""
         drawn = set()
         caves = self.level.level
 
-        for cave in caves.values():
+        for location in explored:
+            cave = caves[location]
             coords = self.rotated(np.array(cave.coords))
 
             for edge in cave.tunnels:
