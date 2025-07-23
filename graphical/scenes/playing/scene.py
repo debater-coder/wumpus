@@ -21,9 +21,9 @@ class Playing(Scene):
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["zinc_950"])
 
-        font = pg.font.Font(None, 64)
+        self.font = pg.font.Font(None, 64)
 
-        self.text = font.render(f"Level {level_index + 1}", True, COLOURS["zinc_600"])
+        self.level_number_text = self.font.render(f"Level {level_index + 1}", True, COLOURS["zinc_600"])
 
         self.map = importlib.resources.read_text(
             wumpus.levels, f"{level_index:02}.json"
@@ -38,6 +38,11 @@ class Playing(Scene):
         self.renderer.focus_cave(self.player.cave)
 
         self.shooting_path: list[int] = []
+        self.deaths = 0
+        self.update_deaths()
+
+    def update_deaths(self):
+        self.death_text = self.font.render(f"Deaths: {self.deaths}", True, COLOURS["zinc_300"])
 
     def handle_mouse_click(self, event: pg.event.Event):
         clicked_cave = self.renderer.get_cave_at_pos(pg.Vector2(event.pos))
@@ -83,8 +88,8 @@ class Playing(Scene):
                     self.shooting_path = []
 
         if not self.player.alive:
-            # TODO: death screen
-            yield PushScene(Paused(self.screen))
+            self.deaths += 1
+            self.update_deaths()
             self.respawn()
 
         if self.player.win:
@@ -120,7 +125,10 @@ class Playing(Scene):
     def paint(self):
         self.screen.blit(self.background, (0, 0))
         self.screen.blit(
-            self.text, self.text.get_rect(center=self.screen.get_rect().center)
+            self.level_number_text, self.level_number_text.get_rect(center=self.screen.get_rect().center)
+        )
+        self.screen.blit(
+            self.death_text, self.level_number_text.get_rect(topleft=(40, 40))
         )
 
         self.renderer.paint(
