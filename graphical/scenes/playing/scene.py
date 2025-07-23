@@ -1,7 +1,9 @@
 from collections.abc import Iterator
+import typing
 import pygame as pg
 import importlib.resources
 
+from graphical.animate import Animator
 from wumpus import Level, PlayerController
 from wumpus.hazards import Wumpus
 import wumpus.levels
@@ -17,6 +19,7 @@ class Playing(Scene):
     def __init__(self, screen: pg.surface.Surface, level_index: int):
         self.screen = screen
         self.level_index = level_index
+        self.clock = pg.time.Clock()
 
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["zinc_950"])
@@ -40,6 +43,18 @@ class Playing(Scene):
         self.shooting_path: list[int] = []
         self.deaths = 0
         self.update_deaths()
+
+        self.death_tint = pg.Surface(self.screen.get_size())
+        self.death_tint.fill(COLOURS["red_500"])
+
+        self.death_fade: Animator | None = None
+
+    def start_death_fade(self):
+        self.death_fade = Animator(127, 0, 500, self.end_death_fade)
+        self.death_fade.start()
+
+    def end_death_fade(self):
+        self.death_fade = None
 
     def update_deaths(self):
         self.death_text = self.font.render(f"Deaths: {self.deaths}", True, COLOURS["zinc_300"])
@@ -89,6 +104,7 @@ class Playing(Scene):
 
         if not self.player.alive:
             self.deaths += 1
+            self.start_death_fade()
             self.update_deaths()
             self.respawn()
 
@@ -123,6 +139,8 @@ class Playing(Scene):
                     )
 
     def paint(self):
+        delta = self.clock.tick(60)
+
         self.screen.blit(self.background, (0, 0))
         self.screen.blit(
             self.level_number_text, self.level_number_text.get_rect(center=self.screen.get_rect().center)
@@ -139,7 +157,16 @@ class Playing(Scene):
             self.explored,
             self.wumpus_indicators,
             self.player.win,
+            delta=delta
         )
+
+        if self.death_fade:
+            self.death_fade.update(delta)
+
+        # this is in a separate branch since update may cause the death fade to end
+        if self.death_fade:
+            self.death_tint.set_alpha(int(typing.cast(float, self.death_fade.get_value())))
+            self.screen.blit(self.death_tint, (0, 0))
 
         pg.display.flip()
 

@@ -261,8 +261,8 @@ class Renderer:
         explored: set[int],
         near_wumpus: set[int],
         show_wumpus: bool,
+        delta: int
     ):
-        delta = self.clock.tick()
         if self.rotor_animation:
             self.rotor_animation.rotation.update(delta)
 
