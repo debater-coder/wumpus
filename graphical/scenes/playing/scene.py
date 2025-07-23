@@ -26,7 +26,9 @@ class Playing(Scene):
 
         self.font = pg.font.Font(None, 64)
 
-        self.level_number_text = self.font.render(f"Level {level_index + 1}", True, COLOURS["zinc_600"])
+        self.level_number_text = self.font.render(
+            f"Level {level_index + 1}", True, COLOURS["zinc_600"]
+        )
 
         self.map = importlib.resources.read_text(
             wumpus.levels, f"{level_index:02}.json"
@@ -57,7 +59,9 @@ class Playing(Scene):
         self.death_fade = None
 
     def update_deaths(self):
-        self.death_text = self.font.render(f"Deaths: {self.deaths}", True, COLOURS["zinc_300"])
+        self.death_text = self.font.render(
+            f"Deaths: {self.deaths}", True, COLOURS["zinc_300"]
+        )
 
     def handle_mouse_click(self, event: pg.event.Event):
         clicked_cave = self.renderer.get_cave_at_pos(pg.Vector2(event.pos))
@@ -72,18 +76,19 @@ class Playing(Scene):
                 self.explored.add(self.player.cave.location)
                 self.explored.add(clicked_cave.location)
         elif event.button == 3:  # Right mouse button
-            if (
-                not self.shooting_path
-                and clicked_cave.location in self.player.cave.tunnels
-            ):
-                self.shooting_path.append(clicked_cave.location)
-            elif (
-                clicked_cave.location
-                in self.level.get_cave(self.shooting_path[-1]).tunnels
-            ):
-                self.shooting_path.append(clicked_cave.location)
+            if not self.shooting_path:
+                if clicked_cave.location in self.player.cave.tunnels:
+                    self.shooting_path.append(clicked_cave.location)
+                else:
+                    self.shooting_path = []
             else:
-                self.shooting_path = []
+                if (
+                    clicked_cave.location
+                    in self.level.get_cave(self.shooting_path[-1]).tunnels
+                ):
+                    self.shooting_path.append(clicked_cave.location)
+                else:
+                    self.shooting_path = []
 
     def respawn(self):
         self.player.respawn()
@@ -143,7 +148,8 @@ class Playing(Scene):
 
         self.screen.blit(self.background, (0, 0))
         self.screen.blit(
-            self.level_number_text, self.level_number_text.get_rect(center=self.screen.get_rect().center)
+            self.level_number_text,
+            self.level_number_text.get_rect(center=self.screen.get_rect().center),
         )
         self.screen.blit(
             self.death_text, self.level_number_text.get_rect(topleft=(40, 40))
@@ -157,7 +163,7 @@ class Playing(Scene):
             self.explored,
             self.wumpus_indicators,
             self.player.win,
-            delta=delta
+            delta=delta,
         )
 
         if self.death_fade:
@@ -165,7 +171,9 @@ class Playing(Scene):
 
         # this is in a separate branch since update may cause the death fade to end
         if self.death_fade:
-            self.death_tint.set_alpha(int(typing.cast(float, self.death_fade.get_value())))
+            self.death_tint.set_alpha(
+                int(typing.cast(float, self.death_fade.get_value()))
+            )
             self.screen.blit(self.death_tint, (0, 0))
 
         pg.display.flip()

@@ -75,16 +75,6 @@ class Renderer:
 
     def reset_rotor(self):
         self.rotor = self.algebra.scalar(np.array([1]))
-        if self.dimension == 4:
-            self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[0][1], math.pi / 4
-            )
-            self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[1][1], math.pi / 4
-            )
-            self.rotate(
-                self.basis_vectors[3][1] ^ self.basis_vectors[2][1], math.pi / 4
-            )
 
         self.rotor_animation: RotorAnimation | None = None
 
@@ -261,7 +251,7 @@ class Renderer:
         explored: set[int],
         near_wumpus: set[int],
         show_wumpus: bool,
-        delta: int
+        delta: int,
     ):
         if self.rotor_animation:
             self.rotor_animation.rotation.update(delta)
