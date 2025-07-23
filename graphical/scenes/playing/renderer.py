@@ -245,13 +245,13 @@ class Renderer:
     def paint(
         self,
         surf: pg.surface.Surface,
-        location: int | None,
-        mouse_pos: pg.Vector2,
-        shooting_path: list[int],
-        explored: set[int],
-        near_wumpus: set[int],
-        show_wumpus: bool,
-        delta: int,
+        location: int | None = None,
+        mouse_pos: pg.Vector2 = pg.Vector2(0, 0),
+        shooting_path: list[int] = [],
+        explored: set[int] = set(),
+        near_wumpus: set[int] = set(),
+        show_wumpus: bool = False,
+        delta: int = 0,
     ):
         if self.rotor_animation:
             self.rotor_animation.rotation.update(delta)
