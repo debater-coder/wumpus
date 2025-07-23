@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from kingdon import Algebra, MultiVector
 import numpy as np
 import numpy.typing as npt
 import pygame as pg
 import math
 
+from graphical.animate import Animator
 from wumpus import Level, Cave
 
 from graphical.colours import COLOURS
@@ -13,6 +15,21 @@ import graphical.icons
 from .drawable import RenderContext
 from .cave import DrawableCave, DrawablePlayer
 from .drawable import Drawable
+
+
+@dataclass
+class RotorAnimation:
+    bivector: MultiVector
+    rotation: Animator
+
+    def __post_init__(self):
+        self.rotation.start()
+
+    def apply_on_rotor(self, rotor: MultiVector):
+        return (
+            (self.bivector.grade(2).normalized() * self.rotation.get_value() / 2).exp()
+            * rotor
+        ).normalized()
 
 
 class Renderer:
@@ -28,6 +45,7 @@ class Renderer:
         self.fov = fov
         self.dimension = len(list(self.level.level.values())[0].coords)
         self.algebra = Algebra(self.dimension)  # Clifford algebra
+        self.clock = pg.time.Clock()
 
         self.basis_vectors = list(
             filter(
@@ -41,14 +59,15 @@ class Renderer:
         self.load_icons()
 
     def focus_cave(self, cave: Cave):
-        coords: MultiVector = self.algebra.vector(self.rotated(np.array(cave.coords))).normalized()
+        coords: MultiVector = self.algebra.vector(
+            self.rotated(np.array(cave.coords))
+        ).normalized()
         target: MultiVector = -self.basis_vectors[2][1]
 
         # get angle between the two
         angle = math.acos((coords | target).grade(0)._values[0])
 
-
-        self.rotate((target ^ coords).normalized(), angle)
+        self.rotate((target ^ coords).normalized(), angle, duration=500)
 
     def reset_zoom(self):
         """positions camera at (0, 0, -5, 0, 0, ...)"""
@@ -67,11 +86,29 @@ class Renderer:
                 self.basis_vectors[3][1] ^ self.basis_vectors[2][1], math.pi / 4
             )
 
-    def rotate(self, bivector: MultiVector, angle: float):
+        self.rotor_animation: RotorAnimation | None = None
+
+    def _finish_animation(self):
+        if self.rotor_animation:
+            self.rotor = self.rotor_animation.apply_on_rotor(self.rotor)
+            self.rotor_animation = None
+
+    def rotate(self, bivector: MultiVector, angle: float, duration: float = 0):
         """Rotate on bivector by angle."""
-        self.rotor = (
-            (bivector.grade(2).normalized() * angle / 2).exp() * self.rotor
-        ).normalized()
+        if duration == 0:
+            self.rotor = (
+                (bivector.grade(2).normalized() * angle / 2).exp() * self.rotor
+            ).normalized()
+        else:
+            self.rotor_animation = RotorAnimation(
+                bivector,
+                Animator(
+                    start_value=0,
+                    end_value=angle,
+                    duration=duration,
+                    on_complete=self._finish_animation,
+                ),
+            )
 
     def zoom(self, value: float):
         """Moves camera on the 'z'-axis by `value`."""
@@ -114,7 +151,12 @@ class Renderer:
 
     def rotated(self, coord: npt.NDArray) -> npt.NDArray:
         """Get the roated nD coordinates of a coordinate."""
-        return self.vector_from_multivector(self.rotor >> self.algebra.vector(coord))
+        rotor = self.rotor
+
+        if self.rotor_animation:
+            rotor = self.rotor_animation.apply_on_rotor(rotor)
+
+        return self.vector_from_multivector(rotor >> self.algebra.vector(coord))
 
     def apply_depth_fade(self, color, coords: npt.NDArray) -> pg.Color:
         """
@@ -220,6 +262,10 @@ class Renderer:
         near_wumpus: set[int],
         show_wumpus: bool,
     ):
+        delta = self.clock.tick()
+        if self.rotor_animation:
+            self.rotor_animation.rotation.update(delta)
+
         """Draws level to screen."""
         context = RenderContext(self, self.level)
 
