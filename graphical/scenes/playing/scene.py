@@ -66,7 +66,6 @@ class Playing(Scene):
     def handle_mouse_click(self, event: pg.event.Event):
         clicked_cave = self.renderer.get_cave_at_pos(pg.Vector2(event.pos))
         if clicked_cave is None:
-            self.shooting_path = []
             return
 
         if event.button == 1:  # Left mouse button
@@ -75,10 +74,11 @@ class Playing(Scene):
                 self.renderer.focus_cave(self.player.cave)
                 self.explored.add(self.player.cave.location)
                 self.explored.add(clicked_cave.location)
-        elif event.button == 3:  # Right mouse button
+        elif event.button == 3 and len(self.shooting_path) < 5:  # Right mouse button
             if not self.shooting_path:
                 if clicked_cave.location in self.player.cave.tunnels:
                     self.shooting_path.append(clicked_cave.location)
+                    self.renderer.focus_cave(clicked_cave)
                 else:
                     self.shooting_path = []
             else:
@@ -87,6 +87,7 @@ class Playing(Scene):
                     in self.level.get_cave(self.shooting_path[-1]).tunnels
                 ):
                     self.shooting_path.append(clicked_cave.location)
+                    self.renderer.focus_cave(clicked_cave)
                 else:
                     self.shooting_path = []
 

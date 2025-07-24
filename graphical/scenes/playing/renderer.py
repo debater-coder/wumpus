@@ -284,7 +284,11 @@ class Renderer:
 
     def get_cave_at_pos(self, pos: pg.Vector2) -> "Cave | None":
         """Get the cave at a given position on the screen."""
-        for cave in self.level.level.values():
+        for cave in sorted(
+            self.level.level.values(),
+            key=lambda cave: self.perp_dist(self.rotated(np.array(cave.coords))),
+            reverse=True,
+        ):
             coords = self.rotated(np.array(cave.coords))
             center = self.project(coords, pg.display.get_surface())
             radius = 100 / max(self.perp_dist(coords), 1e-6)

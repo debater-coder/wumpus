@@ -68,7 +68,8 @@ class MainMenu(Scene):
         self.screen.blit(self.background, (0, 0))
 
         self.renderer.rotate(
-            self.renderer.basis_vectors[2][1] ^ self.renderer.basis_vectors[0][1], delta / 20000
+            self.renderer.basis_vectors[2][1] ^ self.renderer.basis_vectors[0][1],
+            delta / 20000,
         )
         self.renderer.paint(
             self.screen, show_wumpus=True, explored=set(self.level.level.keys())
@@ -76,7 +77,10 @@ class MainMenu(Scene):
 
         self.screen.blit(self.fade_layer, (0, 0))
 
-        self.screen.blit(self.heading, self.heading.get_rect(centerx=self.screen.get_rect().centerx, y=300))
+        self.screen.blit(
+            self.heading,
+            self.heading.get_rect(centerx=self.screen.get_rect().centerx, y=300),
+        )
 
         for button in self.buttons:
             button.paint(self.screen)

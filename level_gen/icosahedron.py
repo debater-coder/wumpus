@@ -12,9 +12,9 @@ plus_or_minus = (-1, 1)
 
 for a in plus_or_minus:
     for b in plus_or_minus:
-            coords.append(np.array([0, a, b * phi]))
-            coords.append(np.array([a, b * phi, 0]))
-            coords.append(np.array([a * phi, 0, b]))
+        coords.append(np.array([0, a, b * phi]))
+        coords.append(np.array([a, b * phi, 0]))
+        coords.append(np.array([a * phi, 0, b]))
 
 edge_length = 2
 
