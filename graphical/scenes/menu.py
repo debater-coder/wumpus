@@ -6,7 +6,6 @@ from ..utils import button_up
 from ..scene import PushScene, Scene, SceneEvent, SwitchScene
 
 from .how_to_play import HowToPlay
-from .level_select import LevelSelect
 
 from ..gui import Button, VStack
 
@@ -58,6 +57,7 @@ class MainMenu(Scene):
         level_select, how_to_play = [button.update(up) for button in self.buttons]
 
         if level_select:
+            from .level_select import LevelSelect
             yield SwitchScene(LevelSelect(self.screen))
 
         if how_to_play:

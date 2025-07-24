@@ -1,3 +1,4 @@
+from pygame.math import Vector2
 from .drawable import Drawable, RenderContext
 from dataclasses import dataclass
 from wumpus import Cave
@@ -21,14 +22,14 @@ class DrawableCave(Drawable):
     def get_coords(self) -> np.ndarray:
         return np.array(self.cave.coords)
 
-    def paint(self, surf: pg.Surface, context: RenderContext):
+    def paint(self, surf: pg.Surface, context: RenderContext, offsetx: float):
         coords = context.get_rotated_coords(self.get_coords())
 
         # Skip caves that are behind the camera
         if context.perp_dist(coords) <= 0:
             return
 
-        center = context.project(coords, surf)
+        center = context.project(coords, surf) + Vector2(offsetx, 0)
         radius = 100 / context.perp_dist(coords)
 
         if self.is_hovered:
@@ -115,14 +116,14 @@ class DrawablePlayer(Drawable):
     def get_coords(self) -> np.ndarray:
         return np.array(self.cave.coords)
 
-    def paint(self, surf: pg.Surface, context: RenderContext):
+    def paint(self, surf: pg.Surface, context: RenderContext, offsetx: float):
         coords = context.get_rotated_coords(self.get_coords())
 
         # Skip if behind camera
         if context.perp_dist(coords) <= 0:
             return
 
-        center = context.project(coords, surf)
+        center = context.project(coords, surf) + Vector2(offsetx, 0)
         size = int(160 / context.perp_dist(coords))
         opacity = int(255 - 255 * max(0, min(0.5, coords[2])))
 

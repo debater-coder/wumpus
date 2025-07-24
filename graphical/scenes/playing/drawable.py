@@ -90,6 +90,6 @@ class Drawable(ABC):
         pass
 
     @abstractmethod
-    def paint(self, surf: pg.Surface, context: RenderContext):
+    def paint(self, surf: pg.Surface, context: RenderContext, offsetx: float):
         """Render this drawable object to the surface."""
         pass

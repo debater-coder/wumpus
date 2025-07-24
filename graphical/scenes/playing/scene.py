@@ -4,11 +4,12 @@ import pygame as pg
 import importlib.resources
 
 from graphical.animate import Animator
+from graphical.scenes.win import Win
 from wumpus import Level, PlayerController
 from wumpus.hazards import Wumpus
 import wumpus.levels
 
-from graphical.scene import PushScene, Scene, SceneEvent
+from graphical.scene import PushScene, Scene, SceneEvent, SwitchScene
 from graphical.colours import COLOURS
 
 from graphical.scenes.paused import Paused
@@ -116,6 +117,7 @@ class Playing(Scene):
 
         if self.player.win:
             self.explored = set(self.level.level.keys())
+            yield SwitchScene(Win(self.screen, self.renderer, self.level_index))
 
         for location in self.player.cave.tunnels:
             if isinstance(

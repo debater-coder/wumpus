@@ -252,6 +252,7 @@ class Renderer:
         near_wumpus: set[int] = set(),
         show_wumpus: bool = False,
         delta: int = 0,
+        offsetx = 0
     ):
         if self.rotor_animation:
             self.rotor_animation.rotation.update(delta)
@@ -277,10 +278,10 @@ class Renderer:
             reverse=True,
         )
 
-        self._draw_tunnels(surf, explored)
+        self._draw_tunnels(surf, explored, offsetx)
 
         for drawable in drawables:
-            drawable.paint(surf, context)
+            drawable.paint(surf, context, offsetx)
 
     def get_cave_at_pos(self, pos: pg.Vector2) -> "Cave | None":
         """Get the cave at a given position on the screen."""
@@ -297,7 +298,7 @@ class Renderer:
                 return cave
         return None
 
-    def _draw_tunnels(self, surf: pg.surface.Surface, explored: set[int]):
+    def _draw_tunnels(self, surf: pg.surface.Surface, explored: set[int], offsetx: float):
         """Draw all tunnel connections between caves."""
         drawn = set()
         caves = self.level.level
@@ -313,7 +314,7 @@ class Renderer:
                 pg.draw.line(
                     surf,
                     COLOURS["zinc_50"],
-                    pg.Vector2(self.project(edge_coords, surf)),
-                    pg.Vector2(self.project(coords, surf)),
+                    pg.Vector2(self.project(edge_coords, surf)) + pg.Vector2(offsetx, 0),
+                    pg.Vector2(self.project(coords, surf)) + pg.Vector2(offsetx, 0),
                 )
                 drawn.add((edge, cave.location))
