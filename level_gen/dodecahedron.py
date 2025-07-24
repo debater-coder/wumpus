@@ -1,7 +1,7 @@
 # Generates coordinates of dodecahedron
 # https://stackoverflow.com/questions/10460337/how-to-generate-calculate-vertices-of-dodecahedron
 import math
-from .common import Node, dump, graph_from_edge_length
+from .common import dump, graph_from_edge_length
 import numpy.typing as npt
 import numpy as np
 
