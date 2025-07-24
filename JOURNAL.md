@@ -37,3 +37,24 @@
 ### Future tasks
 - I've decided against continuing with a flat 2D approach, rather using perspective projection of the actual polyhedral graph
 - Hunt the Wumpus uses a dodechedral graph, so similar levels modelled after Platonic solids can be made
+
+## 20/07/2025 git commit hash `106c2d65c672cbe5ac7d59964eb6f37db517d4f2`
+### Progress
+- Playable graphical version
+  - Uses Renderer class to draw level, Caves and Player are Drawable instances that get sorted by depth
+  - Arbitrary dimension perspective projection allows for 3D and 4D levels (or potentially higher in the future)
+  - Created 4 levels (3 3D levels and 1 4D)
+  - Animations when moving player or shooting to rotate view -- so the player doesn't constantly have to
+  reposition the camera
+  - Spinning level graphics on main menu
+  - Death counter and screen tint to indicate player death
+    - I do this since this game will take a few deaths to complete due to randomness
+    - Deaths are a level statistic that players can try to optimise as a *high score*
+### Future tasks
+- Scene transitions
+- How to play
+- Credits menu
+- Win screen (with high score)
+- Level 5
+- Level unlocking
+- Sound effects
