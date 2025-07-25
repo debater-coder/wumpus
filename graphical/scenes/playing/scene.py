@@ -4,6 +4,7 @@ import pygame as pg
 import importlib.resources
 
 from graphical.animate import Animator
+from graphical.progress import LevelScore
 from graphical.scenes.win import Win
 from wumpus import Level, PlayerController
 from wumpus.hazards import Wumpus
@@ -14,6 +15,7 @@ from graphical.colours import COLOURS
 
 from graphical.scenes.paused import Paused
 from .renderer import Renderer
+import time
 
 
 class Playing(Scene):
@@ -21,6 +23,7 @@ class Playing(Scene):
         self.screen = screen
         self.level_index = level_index
         self.clock = pg.time.Clock()
+        self.start = time.time()
 
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["zinc_950"])
@@ -117,7 +120,14 @@ class Playing(Scene):
 
         if self.player.win:
             self.explored = set(self.level.level.keys())
-            yield SwitchScene(Win(self.screen, self.renderer, self.level_index))
+            yield SwitchScene(
+                Win(
+                    self.screen,
+                    self.renderer,
+                    self.level_index,
+                    LevelScore(deaths=self.deaths, time=time.time() - self.start),
+                )
+            )
 
         for location in self.player.cave.tunnels:
             if isinstance(

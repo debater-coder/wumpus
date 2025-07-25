@@ -58,6 +58,7 @@ class MainMenu(Scene):
 
         if level_select:
             from .level_select import LevelSelect
+
             yield SwitchScene(LevelSelect(self.screen))
 
         if how_to_play:

@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 import pygame as pg
 
+from graphical.progress import LevelScore, Progress
 from graphical.scene import Scene, SceneEvent, SwitchScene
 from graphical.scenes.playing.renderer import Renderer
 
@@ -8,14 +9,35 @@ from ..gui import Button, VStack
 from ..utils import button_up
 from ..colours import COLOURS
 
+
 class Win(Scene):
-    def __init__(self, screen: pg.surface.Surface, renderer: Renderer, level: int):
+    def __init__(
+        self,
+        screen: pg.surface.Surface,
+        renderer: Renderer,
+        level: int,
+        score: LevelScore,
+    ):
         self.screen = screen
         self.renderer = renderer
         self.level = level
+        self.score = score
 
         self.clock = pg.time.Clock()
         font = pg.font.Font(None, 64)
+
+        high_score = Progress().get_high_score(self.level, score) or score
+
+        self.your_score = font.render(
+            f"Your score: Deaths: {score.deaths} Time: {score.time:.2f}s",
+            False,
+            COLOURS["zinc_50"],
+        )
+        self.high_score = font.render(
+            f"High score: Deaths: {high_score.deaths} Time: {high_score.time:.2f}s",
+            False,
+            COLOURS["zinc_50"],
+        )
 
         self.buttons = [
             Button(pg.Rect(0, 0, 0, 80), "Next level", font),
@@ -37,14 +59,17 @@ class Win(Scene):
 
         if next_level:
             from graphical.scenes.playing import Playing
+
             yield SwitchScene(Playing(self.screen, self.level + 1))
 
         if replay:
             from graphical.scenes.playing import Playing
+
             yield SwitchScene(Playing(self.screen, self.level))
 
         if exit:
             from graphical.scenes.menu import MainMenu
+
             yield SwitchScene(MainMenu(self.screen))
 
     def paint(self):
@@ -62,12 +87,17 @@ class Win(Scene):
             )
 
         self.renderer.paint(
-            self.screen, show_wumpus=True, explored=set(self.renderer.level.level.keys()), offsetx=200
+            self.screen,
+            show_wumpus=True,
+            explored=set(self.renderer.level.level.keys()),
+            offsetx=200,
         )
 
         for button in self.buttons:
             button.paint(self.screen)
 
+        self.screen.blit(self.your_score, (40, 40))
+        self.screen.blit(self.high_score, (40, 120))
         pg.display.flip()
 
     def handle_pg_events(self):

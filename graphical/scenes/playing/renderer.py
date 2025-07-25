@@ -252,7 +252,7 @@ class Renderer:
         near_wumpus: set[int] = set(),
         show_wumpus: bool = False,
         delta: int = 0,
-        offsetx = 0
+        offsetx=0,
     ):
         if self.rotor_animation:
             self.rotor_animation.rotation.update(delta)
@@ -298,7 +298,9 @@ class Renderer:
                 return cave
         return None
 
-    def _draw_tunnels(self, surf: pg.surface.Surface, explored: set[int], offsetx: float):
+    def _draw_tunnels(
+        self, surf: pg.surface.Surface, explored: set[int], offsetx: float
+    ):
         """Draw all tunnel connections between caves."""
         drawn = set()
         caves = self.level.level
@@ -314,7 +316,8 @@ class Renderer:
                 pg.draw.line(
                     surf,
                     COLOURS["zinc_50"],
-                    pg.Vector2(self.project(edge_coords, surf)) + pg.Vector2(offsetx, 0),
+                    pg.Vector2(self.project(edge_coords, surf))
+                    + pg.Vector2(offsetx, 0),
                     pg.Vector2(self.project(coords, surf)) + pg.Vector2(offsetx, 0),
                 )
                 drawn.add((edge, cave.location))
