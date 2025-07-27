@@ -1,4 +1,6 @@
 import pygame as pg
+import io
+import importlib.resources
 
 from ..utils import button_up
 
@@ -12,13 +14,16 @@ class HowToPlay(Scene):
         self.screen = screen
         font = pg.font.Font(None, 64)
 
-        self.back = Button(pg.Rect(40, 40, 300, 80), "Back", font)
+        self.back = Button(pg.Rect(10, 10, 300, 80), "Back", font)
+        self.back.bg_colour = COLOURS["blue_900"]
+        self.back.hover_colour = COLOURS["blue_800"]
 
-        self.background = pg.Surface(self.screen.get_size()).convert()
-        self.background.fill(COLOURS["zinc_950"])
+        import graphical.scenes
+        image_data = importlib.resources.read_binary(graphical.scenes, "how_to_play.png")
+        self.image = pg.image.load(io.BytesIO(image_data)).convert()
 
     def handle_pg_events(self):
-        self.screen.blit(self.background, (0, 0))
+        self.screen.blit(self.image, (0, 0))
         if self.back.update(button_up()):
             yield PopScene()
 
