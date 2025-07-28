@@ -21,5 +21,6 @@ in pkgs.mkShell {
         )
       ]))
       pkgs.graphviz
+      pkgs.typst
     ];
 }
