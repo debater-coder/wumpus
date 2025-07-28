@@ -12,6 +12,9 @@ import wumpus.levels
 
 from graphical.scene import PushScene, Scene, SceneEvent, SwitchScene
 from graphical.colours import COLOURS
+from graphical.gui import Button
+
+from graphical.utils import button_up
 
 from graphical.scenes.paused import Paused
 from .renderer import Renderer
@@ -24,6 +27,7 @@ class Playing(Scene):
         self.level_index = level_index
         self.clock = pg.time.Clock()
         self.start = time.time()
+        self.acc_time = 0
 
         self.background = pg.Surface(self.screen.get_size()).convert()
         self.background.fill(COLOURS["zinc_950"])
@@ -55,12 +59,22 @@ class Playing(Scene):
 
         self.death_fade: Animator | None = None
 
+        self.pause_button = Button(pg.Rect(10, 10, 300, 80), "Pause", self.font)
+        self.pause_button.bg_colour = COLOURS["blue_900"]
+        self.pause_button.hover_colour = COLOURS["blue_800"]
+
     def start_death_fade(self):
         self.death_fade = Animator(127, 0, 500, self.end_death_fade)
         self.death_fade.start()
 
     def end_death_fade(self):
         self.death_fade = None
+
+    def pause(self):
+        self.acc_time += time.time() - self.start
+
+    def resume(self):
+        self.start = time.time()
 
     def update_deaths(self):
         self.death_text = self.font.render(
@@ -101,6 +115,11 @@ class Playing(Scene):
         self.wumpus_indicators = set()
 
     def update(self) -> Iterator[SceneEvent]:
+        up = button_up()
+        if self.pause_button.update(up):
+            yield PushScene(Paused(self.screen))
+
+
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
                 case pg.K_ESCAPE:
@@ -125,7 +144,7 @@ class Playing(Scene):
                     self.screen,
                     self.renderer,
                     self.level_index,
-                    LevelScore(deaths=self.deaths, time=time.time() - self.start),
+                    LevelScore(deaths=self.deaths, time=time.time() - self.start + self.acc_time),
                 )
             )
 
@@ -178,6 +197,8 @@ class Playing(Scene):
             self.player.win,
             delta=delta,
         )
+
+        self.pause_button.paint(self.screen)
 
         if self.death_fade:
             self.death_fade.update(delta)
