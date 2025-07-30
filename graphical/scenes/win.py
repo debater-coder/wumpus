@@ -39,8 +39,9 @@ class Win(Scene):
             COLOURS["zinc_50"],
         )
 
-        self.buttons = [
+        self.buttons = ([
             Button(pg.Rect(0, 0, 0, 80), "Next level", font),
+        ] if level < 4 else []) + [
             Button(pg.Rect(0, 0, 0, 80), "Replay level", font),
             Button(pg.Rect(0, 0, 0, 80), "Exit to Main Menu", font),
         ]

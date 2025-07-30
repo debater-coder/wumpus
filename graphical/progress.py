@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import pickle
+from typing import Literal
 
 
 @dataclass
@@ -50,3 +51,13 @@ class Progress:
 
         self.save_progress()
         return self.progress[level]
+
+    def level_status(self, level: int) -> Literal["locked", "next", "completed"]:
+        if self.progress.get(level):
+            return "completed"
+
+        for i in range(level):
+            if not self.progress.get(i):
+                return "locked"
+
+        return "next"

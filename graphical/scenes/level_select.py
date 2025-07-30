@@ -1,5 +1,8 @@
 from collections.abc import Iterator
+from typing import assert_never
 import pygame as pg
+
+from graphical.progress import Progress
 
 from ..utils import button_up
 
@@ -18,9 +21,27 @@ class LevelSelect(Scene):
 
         font = pg.font.Font(None, 64)
 
-        self.buttons = [
-            Button(pg.Rect(0, 0, 0, 80), f"Level {i}", font) for i in range(1, 6)
-        ]
+        progress = Progress()
+        progress.load_progress()
+
+        self.buttons = []
+        for i in range(5):
+            status = progress.level_status(i)
+            button = Button(pg.Rect(0, 0, 0, 80), f"Level {i + 1}" + (" (Locked)" if status == "locked" else ""), font)
+            match status:
+                case "completed":
+                    pass
+                case "next":
+                    button.bg_colour = COLOURS["blue_900"]
+                    button.hover_colour = COLOURS["blue_800"]
+                case "locked":
+                    button.bg_colour = COLOURS["zinc_900"]
+                    button.hover_colour = COLOURS["zinc_900"]
+                    button.text_colour = COLOURS["zinc_500"]
+                case _:
+                    assert_never(status)
+            self.buttons.append(button)
+
         self.stack = VStack(self.buttons, width=600, gap=20)
 
         self.back = Button(pg.Rect(40, 40, 300, 80), "Back", font)
@@ -36,9 +57,15 @@ class LevelSelect(Scene):
             yield SwitchScene(MainMenu(self.screen))
 
         updates = [button.update(up) for button in self.buttons]
+        if not any(updates):
+            return
 
         try:
-            yield PushScene(Playing(self.screen, level_index=updates.index(True)))
+            index = updates.index(True)
+            progress = Progress()
+            progress.load_progress()
+            if progress.level_status(index) != "locked":
+                yield PushScene(Playing(self.screen, level_index=index))
         except ValueError:
             pass
 
