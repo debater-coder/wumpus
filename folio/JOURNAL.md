@@ -58,3 +58,13 @@
 - Level 5
 - Level unlocking
 - Sound effects
+
+## 31/07/2025 git commit hash `0d256ab3988070b43b3bfdcdfaa36fc65c97d851`
+### Progress
+- How to play
+- Win screen
+- Level 5 completed
+- Level unlocking
+Due to time limitations I did not get to:
+- Sound effect
+- Credits menu (but I will include these in the folio)
