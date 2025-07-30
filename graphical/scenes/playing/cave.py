@@ -12,6 +12,7 @@ __all__ = ["DrawableCave", "DrawablePlayer"]
 
 @dataclass
 class DrawableCave(Drawable):
+    """Draws a single cave on the screen, using information supplied in RenderContext."""
     cave: Cave
     explored: bool = True
     near_wumpus: bool = False

@@ -8,6 +8,7 @@ from .element import Element
 
 @dataclass
 class Button(Element):
+    """A clickable GUI button element, with a label and changed colour on hover."""
     rect: pg.Rect
     text: str
     font: pg.font.Font

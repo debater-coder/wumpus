@@ -4,11 +4,15 @@ import pickle
 
 @dataclass
 class LevelScore:
+    """Stores the score achieved by completing a level."""
+
     deaths: int
     time: float
 
 
 class Progress:
+    """Utility class to handle saving and loading of high scores."""
+
     def __init__(self):
         self.load_progress()
 
@@ -24,6 +28,10 @@ class Progress:
             pickle.dump(self.progress, fp)
 
     def get_high_score(self, level: int, score: LevelScore | None = None):
+        """
+        Returns the high score for a given level. If a score is provided, the high
+        score will be updated if that score beats the current high score.
+        """
         prev_high_score = self.progress.get(level)
 
         if not score:

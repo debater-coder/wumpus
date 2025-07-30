@@ -19,7 +19,10 @@ class HowToPlay(Scene):
         self.back.hover_colour = COLOURS["blue_800"]
 
         import graphical.scenes
-        image_data = importlib.resources.read_binary(graphical.scenes, "how_to_play.png")
+
+        image_data = importlib.resources.read_binary(
+            graphical.scenes, "how_to_play.png"
+        )
         self.image = pg.image.load(io.BytesIO(image_data)).convert()
 
     def handle_pg_events(self):

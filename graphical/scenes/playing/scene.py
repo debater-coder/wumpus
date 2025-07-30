@@ -119,7 +119,6 @@ class Playing(Scene):
         if self.pause_button.update(up):
             yield PushScene(Paused(self.screen))
 
-
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
                 case pg.K_ESCAPE:
@@ -144,7 +143,10 @@ class Playing(Scene):
                     self.screen,
                     self.renderer,
                     self.level_index,
-                    LevelScore(deaths=self.deaths, time=time.time() - self.start + self.acc_time),
+                    LevelScore(
+                        deaths=self.deaths,
+                        time=time.time() - self.start + self.acc_time,
+                    ),
                 )
             )
 

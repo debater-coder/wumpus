@@ -5,10 +5,14 @@ from typing import Optional
 
 
 def button_up():
+    """
+    Returns whether the primary mouse button has been pressed then released.
+    Used to detect button clicks.
+    """
     return any(
         map(
             lambda event: event.button == 1,
-            pg.event.get(eventtype=pg.MOUSEBUTTONDOWN),
+            pg.event.get(eventtype=pg.MOUSEBUTTONUP),
         )
     )
 

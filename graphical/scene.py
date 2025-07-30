@@ -8,20 +8,32 @@ type SceneEvent = PushScene | PopScene | SwitchScene
 
 @dataclass
 class PushScene:
+    """Event to push a new scene onto the scene stack."""
+
     scene: Scene
 
 
 @dataclass
 class PopScene:
+    """Event to pop the current scene from the scene stack."""
+
     pass
 
 
 @dataclass
 class SwitchScene:
+    """Event to repace current scene stack with single scene."""
+
     scene: Scene
 
 
 class Scene:
+    """
+    Class representing a single screen. Scenes are placed on a stack, the top scene will be rendered.
+    When a scene is pushed above the current scene, the current scene will be paused and the top
+    scene will be started.
+    """
+
     def enter(self):
         pass
 
