@@ -111,6 +111,53 @@ Button (Scene),bg_colour,RGB colour,6,Background colour of button
 ,text_colour,RGB colour,6,Colour to draw the text
 ")
 = Testing Strategies
+== Main Game
+
+#table(
+  columns: 4,
+  [*Initial state*], [*User Action*], [*Expected Output*], [*Reason*],
+  [
+#image("screenshots/image.png")
+], [Click and drag], [
+#image("screenshots/image (1).png")
+], [Test rotating view],
+  [
+#image("screenshots/image (2).png")
+], [Scroll down], [
+#image("screenshots/image (3).png")
+], [Test zooming in],
+  [
+#image("screenshots/image (2).png")
+  ], [Scroll up], [
+#image("screenshots/image (5).png")
+], [Test zooming out],
+  [
+#image("screenshots/image (6).png")
+], [Left-click on cave adjacent to player], [
+#image("screenshots/image (7).png")
+], [Clicking on a cave should cause the player to move to it],
+  [#image("screenshots/image (7).png")], [Left-click on cave not adjacent to player], [_no change_], [Player can only move to an adjacent cave],
+  [#image("screenshots/image (7).png")], [Right-click on cave not adjacent to player], [_no change_], [Arrows cannot skip caves],
+  [
+#image("screenshots/image (7).png")
+], [Right-click on a cave adjacent to player], [#image("screenshots/image (8).png")], [Right-clicking specifies a shooting path (highlighted in red)],
+[#image("screenshots/image (8).png")], [Right-click on a cave not adjacent to end of shooting path], [
+  #image("screenshots/image (9).png") _Shooting path has been reset_
+], [Arrows cannot skip caves],
+  [#image("screenshots/image (10).png")
+    _Notice the shooting path contains exactly 5 caves_], [Right click on any cave], [#image("screenshots/image (10).png")
+_no change_
+], [Arrows can travel a maximum of 5 caves],
+  [#image("screenshots/image (10).png")], [Press the 'c' key], [
+    #image("screenshots/image (11).png")
+], [Pressing the 'c' key after  selecting a shooting path will reset it.],
+  [#image("screenshots/image (12).png")
+ _Notice that the player's cave is highlighted as part of the shooting path_], [Shoot cave player is in (by pressing enter)], [#image("screenshots/image (13).png")], [Shooting oneself leads to death and immediate respawning],
+  [#image("screenshots/image (14).png")], [Shoot cave Wumpus is in], [#image("screenshots/image (15).png")], [Shooting the Wumpus completes the level],
+  [#image("screenshots/image (16).png")], [Moving into cave with pit], [#image("screenshots/image (17).png")], [Pit leads to death and immediae respawning],
+  [#image("screenshots/image (18).png")], [Moving into cave with bat], [#image("screenshots/image (19).png")], [Bats teleport player to random cave],
+)
+
 = Evaluation
 == Implementation of Object Oriented Programming concepts
 == Functionality

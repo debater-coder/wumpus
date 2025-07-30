@@ -186,7 +186,7 @@ class Playing(Scene):
             self.level_number_text.get_rect(center=self.screen.get_rect().center),
         )
         self.screen.blit(
-            self.death_text, self.level_number_text.get_rect(topleft=(40, 40))
+            self.death_text, self.death_text.get_rect(topright=(self.screen.get_rect().width - 40, 40))
         )
 
         self.renderer.paint(
