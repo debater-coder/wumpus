@@ -56,7 +56,11 @@ class Win(Scene):
         self.stack.update()
         up = button_up()
 
-        next_level, replay, exit = [button.update(up) for button in self.buttons]
+        next_level, replay, exit = (False, False, False)
+        if len(self.buttons) == 3:
+            next_level, replay, exit = [button.update(up) for button in self.buttons]
+        if len(self.buttons) == 2:
+            replay, exit = [button.update(up) for button in self.buttons]
 
         if next_level:
             from graphical.scenes.playing import Playing
