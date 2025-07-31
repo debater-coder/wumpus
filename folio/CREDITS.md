@@ -7,3 +7,6 @@
 - Graphics -- pygame
 - Vector -- numpy
 - Geometric Algebra -- kingdon
+
+# Lessons
+- Geometric Algebra -- [A Swift Introduction to Geometric Algebra - YouTube](https://www.youtube.com/watch?v=60z_hpEAtD8)

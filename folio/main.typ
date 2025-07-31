@@ -523,5 +523,74 @@ This project is thoroughly documented with both internal and intrinsic documenta
 #cmarker.render(read("./README.md"), h1-level: 2)
 
 = Arbitrary Dimension Perspective Projection and Rotation <perspective>
+== Perspective Projection
+In this project, the game world is not restricted to the familiar two or three
+dimensions, but can exist in any number of spatial dimensions. Each point within
+the world is described by a list of real numbers. For example, a point in
+four-dimensional space is represented as (x, y, z, w), where each coordinate is
+a real number indicating position along that axis.
+
+To render such a world on a two-dimensional screen, the system employs a process
+called perspective projection. The first two coordinates (typically x and y) are
+selected to define the image plane. The image plane is the flat surface onto
+which the world is projected, corresponding to the screen itself. The third
+coordinate (such as z in 3D) is treated as the depth direction, representing the
+line of sight into the scene. In higher dimensions, the choice of which
+coordinate acts as depth can be adjusted, allowing the player to explore and
+visualize the extra dimensions by rotating the view.
+
+Each point, defined by its real-number coordinates, is mathematically mapped
+onto the image plane. The further a point lies along the depth direction, the
+smaller and dimmer it appears, creating a convincing sense of perspective. This
+mimics the way distant objects appear in real life, even when those objects
+exist in dimensions beyond our direct experience.
+
+== Rotation
+Rotation is achieved using a field of mathematics called Geometric Algebra (also
+known as Clifford Algebra, or shortened as GA). While a full description of the
+field is out of scope, a brief relevant overview is provided below.
+
+In this field, vectors (visualised as oriented line segments) are generalised to
+bivectors (visualised as oriented areas), trivectors (visualised as oriented
+volumes) and in general a $k$-grade element is a $k$-vector. In GA, we operate
+on objects called multivectors, which are the linear combination of different
+grade elements. For example 3D multivectors are $"scalar" + "vector" +
+"bivector" + "trivector"$, and this generalises to arbitrary dimensions.
+
+In 3D we often think about rotations as occurring around an axis, however
+generally this is nonsensical. Consider that in 2D there is no orthogonal
+axis for the rotation to occur "around", and in 4D there is more than one
+unique direction perpendicular to any given plane! Thus, it is more
+correct to treat rotations as occurring _in_ a plane. To represent this,
+we use bivectors which are our 2 dimensional elements in the sum
+that constitutes multivectors.
+
+Thus we see rotation as an operation involving *a plane and an angle*.
+It is trivial to obtain a bivector between any two arbitrary vectors,
+so this is very useful for animating the camera rotation between two
+caves.
+
+Geometric algebra is extremely powerful, as it allows for concepts such
+as arbitrary dimension rotation to be expressed very concisely. Below
+are the equations used in this project. An explanation of these is out
+of scope but a reference is provided in @credits
+
+*Rotate vector by rotor:*
+$ v' = R v R^(-1) $
+where $v'$ is the rotated vector, $v$ is the initial vector and $R$ is the rotor.
+This takes a vector and rotates it by the current rotor (which is initialised to the
+scalar $1$).
+
+*Update rotor by bivector and angle:*
+$ R' = e^(B theta / 2) R $
+where $R'$ is the updated rotor, $B$ is the bivector defining the plane of rotation, $theta$ is
+the angle to rotate in radians and $R$ is the initial rotor. This equation will take
+the current rotor (representing the current view angle) and rotate it by a plane and an angle.
+Notice the $theta / 2$, is because this rotor will be applied twice
+(multivectors are non-commutative). You may also notice that this looks simiar to rotation of
+complex numbers in 2D or almost identical to rotation of
+quaternions in 3D. This is because GA provides a generalisation that is isomorphic to these
+constructs in lower dimensions.
+
 = Credits <credits>
 #cmarker.render(read("./CREDITS.md"), h1-level: 2)
