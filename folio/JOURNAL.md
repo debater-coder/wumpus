@@ -65,6 +65,7 @@
 - Win screen
 - Level 5 completed
 - Level unlocking
+
 Due to time limitations I did not get to:
-- Sound effect
+- Sound effects
 - Credits menu (but I will include these in the folio)

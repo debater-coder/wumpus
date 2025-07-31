@@ -47,6 +47,7 @@ class PlayerController:
         self.emit_to_level(ArrowMissed())
 
     def emit_to_level(self, event: Event) -> Iterator[ArrowHit]:
+        """Sends an event to the level, yielding events that happen in return."""
         for player_event in self.level.handle_event(event):
             if self.level.debug:
                 print("player handling event:", player_event)

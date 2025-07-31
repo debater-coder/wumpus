@@ -160,9 +160,242 @@ _no change_
 
 = Evaluation
 == Implementation of Object Oriented Programming concepts
+=== Encapsulation
+Encapsulation is the bundling of attributes with methods to hide internal details about an object
+that other modules are not concerned with. An example of this is the *Facade pattern*.
+
+The core Wumpus game logic is separated from the graphical package, as the graphical code
+is not concerned with it. Thus, I use the Facade pattern in `PlayerController` to provide
+a simplified external interface to the game logic.
+
+```py
+
+class PlayerController:
+    """
+    Responsibility:
+        - Emit events to level like PlayerMoved
+        - Handle events such as PlayerKilled
+    """
+
+    def __init__(self, level: Level):
+        self.level = level
+
+        self.cave = level.choose_empty_cave()
+        self.initial_cave = self.cave
+        self.alive = True
+        self.win = False
+
+        list(self.emit_to_level(PlayerMoved(self.cave.location)))
+
+    def move(self, location: int):
+        list(self.emit_to_level(PlayerMoved(location)))
+
+    def shoot(self, locations: list[int]):
+        for location in locations:
+            if any(
+                [
+                    isinstance(event, ArrowHit)
+                    for event in self.emit_to_level(ArrowShot(location))
+                ]
+            ):
+                return
+
+        self.emit_to_level(ArrowMissed())
+
+    def emit_to_level(self, event: Event) -> Iterator[ArrowHit]:
+        ... # omitted for brevity
+
+    def handle_msg(self, msg: str):
+        pass
+
+    def get_nearby_msgs(self):
+        ... # omitted for brevity
+
+    def respawn(self):
+        ... # omitted for brevity
+```
+
+This class is an example of the Facade pattern, as the internal details of the event system is
+hidden from the other modules which use this class. Instead, other modules call the `PlayerController`'s
+methods to perform actions on the player. For example:
+```py
+player.move(7)
+if not player.alive:
+    player.respawn()
+```
+=== Inheritance
+Inheritance allows for a child class to reuse the methods and attributes of its parent class,
+while only overriding behaviour that differs. Inheritance is used as a mechanism for code reuse
+in the inheritance between `TextPlayerController` and `PlayerController`.
+
+
+```py
+class TextPlayerController(PlayerController):
+    def play(self) -> bool:
+        """Play the game, returns whether the game was won or lost."""
+        while self.alive and not self.win:
+            self.get_action()
+        return self.win
+
+    def get_action(self):
+        ... # text handling omitted for brevity
+
+    def handle_msg(self, msg: str):
+        print(msg)
+```
+
+This class demonstrates reuse of the core game logic defined in `PlayerController`, while
+adding additional functionality allowing it to be controlled using text.
+==== Polymorphism
+Inheritance is also used to achieve dynamic polymorphism, allowing multiple classes to share
+a common interface to implement different behaviours. This can be seen in the `Hazard` class and
+its subclasses.
+
+```py
+class Hazard:
+    """
+    Hazards are located in a cave, they can affect the player's location or
+    cause the player to lose.
+    """
+
+    def __init__(self, level: dict[int, Cave]):
+        self.location: int | None = None
+        self.level = level
+
+    def on_arrow_miss(self) -> Iterator[Event]:
+        """Called when an arrow does not hit any hazards that are not immune."""
+        yield from []
+
+    def on_arrow_enter(self) -> Iterator[Event]:
+        """
+        Called when an arrow hits the cave this hazard is in.
+
+        Returns: Whether the arrow has considered to 'hit' the hazard.
+        Most hazards are immune by arrows, so they should return False.
+        """
+        yield from []
+
+    def on_player_enter(self) -> Iterator[Event]:
+        """Called when the player enters the cave this hazard is in."""
+        yield from []
+
+    def nearby_msg(self) -> str:
+        """Returns a message to be printed when a hazard is nearby."""
+        return "Unknown hazard nearby."
+
+class BottomlessPit(Hazard):
+    """Kills the player when it enters the cave."""
+
+    def nearby_msg(self):
+        return "I feel a draft."
+
+    def on_player_enter(self):
+        yield "You fell into a bottomless pit."
+        yield PlayerKilled()
+```
+
+Here, the `Hazard` parent class defines a common interface for hazards to define their interactions.
+It contains blank implementations of hazard reactions to different events. Thus, as seen in
+`BottomlessPit`, child classes only need to override functionality that they actually implement,
+while still allowing all hazards to be controlled in a unified way. This is considered polymorphism
+(meaning "many forms"), as objects of different classes can be used in the same way, without being
+concerned with what specific subclass is in use.
+=== Evaluation of implementation of OOP concepts
+This project demonstrates a strong implementation of OOP concepts, effectively using classes and
+methods to reuse functionality.
 == Functionality
-- TODO: write about how tunnels always draw behind nodes and how that is technically wrong.
+=== Features
+This project provides a complete, playable game with 5 different levels. Each level provides a unique
+map with randomly spawned hazards which can be interacted with. The game features menus including:
+- Main Menu
+- Level Select
+- How to Play
+- Pause Menu
+- Win Menu
+
+This game has a progress mechanism where levels are "locked", until the level before it has been completed.
+This allows for a gradual increase in difficulty as the player completes the game. Futhermore, this game
+has a high score mechanism, which keeps track of the number of times the player has died in the level
+and how long the player takes to complete.
+
+Within a level, my game implements features close to the original Hunt the Wumpus game. It includes the three
+original hazards: Wumpus, Bottomless Pit, Super bats and similar movement and shooting mechanics to the original
+game. Added functionality includes the ability to rotate the 3D view and zoom in and out (further explained in @perspective).
+
+=== Polish
+Polish refers to features which improve the player experience with subtle tweaks and refinements.
+Some examples of polish in this game:
+- Camera rotation animation when clicking on a cave
+- Brief red tint on screen which fades out to give an indication of player death
+- Animations follow a more realistic easing curve -- animations don't abruptly start and stop rather they speed up and slow down similar to real world objects
+- When the mouse cursor is "hovered" over a clickable button, it changes colour subtly to indicate that it is clickable
+- Borders on buttons are slightly rounded
+- Important buttons like the pause button, back button or the next unplayed level in level select are a different colour for visual contrast to draw attention to them
+- The Main Menu features a rotating Wumpus cave in the background for visual interest
+- Upon completing a level, the entire shape of the level is revealed in a slowly rotating view
+=== Possible improvements
+There are some small features that could further improve player experience, but have not been implemented due to time:
+- Sound effects
+- Fade transitions between screens
+- A settings menu to reset progress
+- Text on screen to supplement visual indication of hazards
+- Further levels could introduce novel hazards
+- Credits in an in-game menu (see @credits)
+
+There is also a visual inconsistency in the way tunnels are rendered. The lines that represent tunnels
+will always render behind all caves, however sometimes this is incorrect. This is rarely noticable
+but fixing this could improve player experience.
+
+=== Evaluation of functionality
+This is a complete and functional game, with a high degree of polish and additional features. While it does
+lack some features that would be recommended for a public release of a game, it is certainly in a *playable state*
+with multiple levels and menus.
 == Originality
+This project provides an original interpretation of the Hunt the Wumpus game
+while staying true to the original intentions of the game. The original game was
+text-based, containing a single level. Hunt the Wumpus was created due to the
+*creator's frustrations with the multitude of "hide and seek computer game[s]"
+based on square grids*. Yob's innovation was creating a hide and seek game where
+the caves were a *non-grid pattern*. However, *graphical versions of the game
+present their levels on a square grid*, usually by *"flattening"* the caves
+network by forcing them to fit on a square grid. *This ultimately limits the
+complexity of levels in these games to those that fit on a grid.*
+
+This game provides a different interpretation, *preserving the non-grid pattern
+of the original game*. It does this through arbitrary dimension perspective
+projection and rotation (described in @perspective). What this means is the game
+rendering logic can draw levels of any dimension greater than or equal to 3. To
+effectively explore these levels, this game provides *zoom and rotate
+functionality*. *There are 3 3D levels and 2 2D levels included*. The mechanisms and intuition
+for understanding higher dimensions than 3 are provided in @perspective, but
+they are not necessary to be able to play the levels. The purpose of these
+levels is to present a *further challenge to the player* that would not be common
+in other video games.
+
+=== Levels
+All levels have cave structures based on different mathematically interesting shapes.
+
+/ Level 1: Dodecahedron (3D) _This level was also used in the original textual *Hunt the Wumpus*, but here it is playable in 3D._
+/ Level 2: Icoasahedron (3D)
+/ Level 3: Mobius strip (3D)
+/ Level 4: Tesseract (4D)
+/ Level 5: 24-cell (4D)
+
+=== Evalutation of originality
+*Wumpus: Network* is a highly original interpretation of *Hunt the Wumpus*,
+providing unique features that are rare even for video games in general. It does
+this while preserving the experience of playing the original game, by keeping
+the same core mechanic of deducing where hazards are based on the current cave.
+While my game does not add new hazards or interactions compared to the original
+version, it instead explores how this could be extended in more complex and
+challenging levels, as well as a novel interface.
+
+This project implements a feature set significantly different provided in the
+support resource. Even without the graphical implementation, *this project
+implements key features of the textual Hunt the Wumpus not present in the guided
+walkthrough*, such as the ability for the Wumpus to move between caves, and
+randomly spawned hazards.
+
 == Documentation
 
 #import "@preview/numbly:0.1.0": numbly
@@ -170,9 +403,11 @@ _no change_
 #set heading(numbering: numbly(
   "Appendix {1:A}.", // use {level:format} to specify the format
   "{1:A}.{2}.",
-))
+), supplement: [])
 
 = Code structure
 #cmarker.render(read("./README.md"), h1-level: 2)
 
-= Arbitrary Dimension Perspective Projection and Rotation
+= Arbitrary Dimension Perspective Projection and Rotation <perspective>
+= Credits <credits>
+#cmarker.render(read("./CREDITS.md"), h1-level: 2)

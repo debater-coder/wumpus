@@ -27,6 +27,8 @@ class Playing(Scene):
         self.level_index = level_index
         self.clock = pg.time.Clock()
         self.start = time.time()
+        # This saves the current timer whenever the level is paused, so the accumuated time
+        # before the last pause is added to the final time.
         self.acc_time = 0
 
         self.background = pg.Surface(self.screen.get_size()).convert()
@@ -119,6 +121,7 @@ class Playing(Scene):
         if self.pause_button.update(up):
             yield PushScene(Paused(self.screen))
 
+        # Handle keypresses
         for event in pg.event.get(eventtype=pg.KEYUP):
             match event.key:
                 case pg.K_ESCAPE:
@@ -130,6 +133,7 @@ class Playing(Scene):
                 case pg.K_c:
                     self.shooting_path = []
 
+        # Respawn and flash red on death
         if not self.player.alive:
             self.deaths += 1
             self.start_death_fade()
@@ -137,7 +141,7 @@ class Playing(Scene):
             self.respawn()
 
         if self.player.win:
-            self.explored = set(self.level.level.keys())
+            self.explored = set(self.level.level.keys())  # On win, all caves are explored
             yield SwitchScene(
                 Win(
                     self.screen,
