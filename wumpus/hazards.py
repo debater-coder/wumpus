@@ -23,8 +23,8 @@ class Hazard:
         """
         Called when an arrow hits the cave this hazard is in.
 
-        Returns: Whether the arrow has considered to 'hit' the hazard.
-        Most hazards are immune by arrows, so they should return False.
+        Should yield an ArrowHit event if the arrow has considered to 'hit` the hazard.
+        Most hazards are immune by arrows, so they should not yield this event.
         """
         yield from []
 

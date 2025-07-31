@@ -11,7 +11,7 @@ Object Oriented Programming Assessment Task*])
 
 #align(center)[Hamzah Ahmed]
 
-#outline(depth: 1)
+#outline()
 = Overview
 This document provides documentation for the Preliminary Object Oriented Programming
 Project. The appendixes provide external documentation and context useful for those
@@ -112,10 +112,10 @@ Button (Scene),bg_colour,RGB colour,6,Background colour of button
 ")
 = Testing Strategies
 == Main Game
-
+#set table.cell(breakable: false)
 #table(
-  columns: 4,
-  [*Initial state*], [*User Action*], [*Expected Output*], [*Reason*],
+  columns: (2fr, 1fr, 2fr, 1fr),
+  table.header(repeat: true, [*Initial state*], [*User Action*], [*Expected Output*], [*Reason*]),
   [
 #image("screenshots/image.png")
 ], [Click and drag], [
@@ -381,7 +381,7 @@ All levels have cave structures based on different mathematically interesting sh
 / Level 4: Tesseract (4D)
 / Level 5: 24-cell (4D)
 
-=== Evalutation of originality
+=== Evaluation of originality
 *Wumpus: Network* is a highly original interpretation of *Hunt the Wumpus*,
 providing unique features that are rare even for video games in general. It does
 this while preserving the experience of playing the original game, by keeping
@@ -397,6 +397,120 @@ walkthrough*, such as the ability for the Wumpus to move between caves, and
 randomly spawned hazards.
 
 == Documentation
+This project has both internal and intrinsic documentation within the codebase.
+=== Intrinsic
+Intrinisic documentation makes the code more understandable by using clear
+structure and naming within the structures of the code itself.
+
+*Examples:*
+```py
+@dataclass
+class Cave:
+    location: int
+    tunnels: list[int]
+    coords: tuple[float, ...]
+```
+The class, attributes and type annotations within this code make the purpose and structure of the code clear.
+
+```py
+class Superbats(Hazard):
+    def nearby_msg(self):
+        return "Bats nearby."
+
+    def on_player_enter(self):
+        yield "ZAP -- Super bat snatch! Elsewhereville for you!"
+        yield PlayerMoved(choice(list(self.level.values())).location)
+```
+The class and method names in this code make it clear what each hazard does.
+
+```py
+class PlayerController:
+    def __init__(self, level: Level):
+        self.level = level
+        self.cave = level.choose_empty_cave()
+        self.initial_cave = self.cave
+        self.alive = True
+        self.win = False
+```
+
+The names of the attributes in this class make the player's initial state clear.
+The ```py level.choose_empty_cave()``` method has a descriptive name to help
+readers of the code understand its purpose.
+
+=== Internal
+The need for internal documentation is reduced through intrinsic documentation, however
+it is still important to describe the purpose of code, or to clarify complex procedures.
+
+In Python, internal documentation takes the form of "docstrings" (special
+comments tied to a specific method, function, class or module) or inline
+comments.
+
+*Examples:*
+
+```py
+class PlayerController:
+    """
+    Responsibility:
+        - Emit events to level like PlayerMoved
+        - Handle events such as PlayerKilled
+    """
+    ...
+```
+This class-level docstring explains the overall responsibility of the `PlayerController` class, making its role in the system clear.
+
+```py
+class Hazard:
+    """
+    Hazards are located in a cave, they can affect the player's location or
+    cause the player to lose.
+    """
+    ...
+    def on_player_enter(self) -> Iterator[Event]:
+        """Called when the player enters the cave this hazard is in."""
+        yield from []
+```
+Here, both the class and method docstrings describe the purpose and expected behavior, clarifying how hazards interact with the player.
+
+```py
+def emit_to_level(self, event: Event) -> Iterator[ArrowHit]:
+    # This method sends an event to the level and yields any ArrowHit events in response.
+    ...
+```
+This inline comment explains a non-obvious implementation detail about how events are handled and what is yielded.
+
+```py
+def on_arrow_enter(self) -> Iterator[Event]:
+    """
+    Called when an arrow hits the cave this hazard is in.
+
+    Should yield an ArrowHit event if the arrow has considered to 'hit` the hazard.
+    Most hazards are immune by arrows, so they should not yield this event.
+    """
+    yield from []
+```
+This method-level docstring provides additional context about the method's
+purpose and its expected return value, especially clarifying the default
+behavior for most hazards.
+
+```py
+class BottomlessPit(Hazard):
+    """Kills the player when it enters the cave."""
+    ...
+```
+A concise class docstring here makes the effect of the `BottomlessPit` hazard immediately clear to readers.
+```py
+"""
+Events are used to decouple the Hazards from the Level.
+Instead of directly invoking methods on Level, Hazards yield Events, which
+are dispatched to Level. This also prevents circular type imports between Level
+and Hazards.
+"""
+```
+This module level docstring, makes it clear the overall purpose of this section
+of code before readers go into specific classes or methods.
+
+== Evaluation of documentation
+This project is thoroughly documented with both internal and intrinsic documentation.
 
 #import "@preview/numbly:0.1.0": numbly
 #counter(heading).update(0)

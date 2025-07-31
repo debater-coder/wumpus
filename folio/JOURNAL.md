@@ -1,4 +1,5 @@
-## 05/05/2025 git commit hash: `19c52af565583322ebfb73220f7fd8ead5119bbe`
+## 05/05/2025
+git commit hash: `19c52af565583322ebfb73220f7fd8ead5119bbe`
 ### Progress
 - Competed text based implementation of the game
 - This implementation loads the game map from a JSON file
@@ -10,13 +11,15 @@
 - Add unit tests and documentation
 - Change `Level` to an event-based system, where entities yield or return events that control the level, rather than having a tight coupling to the `Level` and `PlayerController`
 
-## 22/05/2025 git commit hash `854cebf7a5eb777694642c36225013d7ddd866ef`
+## 22/05/2025
+git commit hash `854cebf7a5eb777694642c36225013d7ddd866ef`
 ### Progress
 - Added event based architecture
 - This helped to decouple the Hazards from the Level
 - Handling of player interaction with Hazards was also moved to Level.
 
-## 13/06/2025 git commit hash `9003447fea0d29cc30092adac94c328893a5294f`
+## 13/06/2025
+git commit hash `9003447fea0d29cc30092adac94c328893a5294f`
 ### Progress
 - Complete migration to event based architecture
 - Separate text-based game completely from core logic
@@ -26,7 +29,8 @@
 ### Future tasks
 - Create graphical package
 
-## 20/05/2025 git commit hash `6a933ba5beb2a14ae5db1195709b73e29b06c576`
+## 20/05/2025
+git commit hash `6a933ba5beb2a14ae5db1195709b73e29b06c576`
 ### Progress
 - Created graphical package
   - Has a stack of scenes (Main Menu, Level Select, How to Play, Playing, Paused)
@@ -38,7 +42,8 @@
 - I've decided against continuing with a flat 2D approach, rather using perspective projection of the actual polyhedral graph
 - Hunt the Wumpus uses a dodechedral graph, so similar levels modelled after Platonic solids can be made
 
-## 20/07/2025 git commit hash `106c2d65c672cbe5ac7d59964eb6f37db517d4f2`
+## 20/07/2025
+git commit hash `106c2d65c672cbe5ac7d59964eb6f37db517d4f2`
 ### Progress
 - Playable graphical version
   - Uses Renderer class to draw level, Caves and Player are Drawable instances that get sorted by depth
@@ -59,7 +64,8 @@
 - Level unlocking
 - Sound effects
 
-## 31/07/2025 git commit hash `0d256ab3988070b43b3bfdcdfaa36fc65c97d851`
+## 31/07/2025
+git commit hash `0d256ab3988070b43b3bfdcdfaa36fc65c97d851`
 ### Progress
 - How to play
 - Win screen
