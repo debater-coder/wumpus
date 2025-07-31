@@ -46,7 +46,7 @@ interesting levels.
 == Class Diagram
 #image("Class Diagram.png")
 = Data Dictionary
-== Internal represenation
+== Internal representation
 #let data_dictionary_table(text) = table(
   columns: (1fr, 1fr, 2fr, 1fr, 2fr),
   align: (auto, auto, auto, center, auto),
@@ -319,7 +319,7 @@ has a high score mechanism, which keeps track of the number of times the player 
 and how long the player takes to complete.
 
 Within a level, my game implements features close to the original Hunt the Wumpus game. It includes the three
-original hazards: Wumpus, Bottomless Pit, Super bats and similar movement and shooting mechanics to the original
+original hazards: Wumpus, Bottomless Pit, Superbats and similar movement and shooting mechanics to the original
 game. Added functionality includes the ability to rotate the 3D view and zoom in and out (further explained in @perspective).
 
 === Polish
