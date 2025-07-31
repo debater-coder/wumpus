@@ -304,6 +304,11 @@ concerned with what specific subclass is in use.
 This project demonstrates a strong implementation of OOP concepts, effectively using classes and
 methods to reuse functionality.
 == Functionality
+#grid(columns: 2, gutter: 2pt, image("screenshots/evaluation/how_to_play.png"),
+image("screenshots/evaluation/level_select.png"),
+image("screenshots/evaluation/main_menu.png"),
+image("screenshots/evaluation/paused.png"),
+image("screenshots/evaluation/win.png"))
 === Features
 This project provides a complete, playable game with 5 different levels. Each level provides a unique
 map with randomly spawned hazards which can be interacted with. The game features menus including:
